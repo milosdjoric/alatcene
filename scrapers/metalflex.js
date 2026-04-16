@@ -79,6 +79,8 @@ function parseProducts(html) {
       popustProcenat = Math.round((popustIznos / redovnaCena) * 100);
     }
 
+    const dostupnost = $el.hasClass("outofstock") ? "RASPRODATO" : "NA_STANJU";
+
     if (naziv && cena) {
       products.push({
         id,
@@ -90,6 +92,7 @@ function parseProducts(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
+        dostupnost,
         url,
         izvor: "metalflex",
       });
@@ -181,6 +184,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(unique, "metalflex");
 }
 
 main().catch(console.error);

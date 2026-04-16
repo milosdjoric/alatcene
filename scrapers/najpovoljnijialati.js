@@ -54,7 +54,9 @@ function parseProducts(html) {
     const id = $btn.attr("data-product_id") || null;
     const sku = $btn.attr("data-product_sku") || null;
 
-    const brend = $el.find(".product__brand").text().trim() || null;
+    const brandHref = $el.find("a.product__brand").attr("href") || "";
+    const brandMatch = brandHref.match(/\/brend\/([^/]+)/);
+    const brend = brandMatch ? brandMatch[1].replace(/-/g, " ") : null;
 
     const $price = $el.find(".product__price, .price").first();
     const $ins = $price.find("ins .woocommerce-Price-amount");
@@ -90,6 +92,7 @@ function parseProducts(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
+        dostupnost: $btn.length > 0 ? "NA_STANJU" : "RASPRODATO",
         url,
         izvor: "najpovoljnijialati",
       });
@@ -176,6 +179,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(unique, "najpovoljnijialati");
 }
 
 main().catch(console.error);

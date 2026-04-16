@@ -9,19 +9,13 @@
 - [x] Git init + .gitignore
 - [x] Next.js scaffold (App Router, TS, Tailwind)
 - [x] @supabase/supabase-js instaliran
-
-## Pre sledeće sesije (ručno)
-
-- [ ] Kreirati Supabase projekat na https://supabase.com (free tier)
-- [ ] Sačuvati URL + anon key + service role key
-- [ ] Kreirati GitHub repo (public ili private)
-- [ ] Kupiti domen cenealata.xyz
+- [x] Supabase projekat kreiran (cenealata.xyz, Europe region, RLS uključen)
+- [x] .env.local sa Supabase ključevima
 
 ## Sledeća sesija — redosled
 
 ### 1. Supabase baza
-- [ ] .env.local sa Supabase ključevima
-- [ ] SQL migracije (products tabela, indexi, trigram, RLS)
+- [ ] SQL migracija u Supabase SQL Editor (products tabela, indexi, trigram, RLS)
 - [ ] src/lib/supabase/server.ts i client.ts
 
 ### 2. Import podataka
@@ -39,14 +33,14 @@
 - [ ] src/lib/types.ts (Product interfejs)
 - [ ] src/components/ (SearchBar, ProductCard, FilterBar, SortSelect, SourceBadge)
 - [ ] src/app/page.tsx + layout.tsx
-- [ ] Responsive, Tailwind, shadcn/ui ili custom
+- [ ] Responsive, Tailwind
 
 ### 5. Scraper integracija
 - [ ] Modifikovati svih 17 scrapera da koriste db.js
 - [ ] Ažurirati scrape-all.js (cleanup starih proizvoda)
 
 ### 6. Deploy
-- [ ] Push na GitHub
+- [ ] GitHub repo + push
 - [ ] Vercel import + env varijable
 - [ ] .github/workflows/scrape.yml (cron 0 4 * * * UTC = 6h srpsko)
 - [ ] Cloudflare DNS za cenealata.xyz

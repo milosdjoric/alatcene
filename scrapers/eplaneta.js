@@ -74,6 +74,7 @@ function parseProducts(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
+        dostupnost: "NA_STANJU",
         url,
         izvor: "eplaneta",
       });
@@ -224,6 +225,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(unique, "eplaneta");
 }
 
 main().catch(console.error);

@@ -256,6 +256,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(unique, "superalati");
 }
 
 main().catch(console.error);

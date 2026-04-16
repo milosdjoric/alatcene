@@ -87,6 +87,8 @@ function parsePage(html) {
       specs.push($(li).text().trim());
     });
 
+    const dostupnost = $el.find("button.tocart").length > 0 ? "NA_STANJU" : "RASPRODATO";
+
     if (naziv) {
       products.push({
         id: productId,
@@ -98,6 +100,7 @@ function parsePage(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
+        dostupnost,
         specifikacije: specs.length > 0 ? specs : null,
         url,
         izvor: "gama-alati",
@@ -184,6 +187,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(allProducts, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(allProducts, "gama-alati");
 }
 
 main().catch(console.error);

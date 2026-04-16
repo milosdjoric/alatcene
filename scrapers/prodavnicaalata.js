@@ -45,6 +45,7 @@ function parsePage(html) {
       $btn.attr("data-label") ||
       $el.find(".product-card__name a").text().trim();
     const slug = $btn.attr("data-slug") || "";
+    const stanje = parseInt($btn.attr("data-stock"), 10) || 0;
     const redovnaCena = parseFloat($btn.attr("data-price")) || null;
     const akcijskaCena = parseFloat($btn.attr("data-sale_price")) || null;
 
@@ -74,6 +75,8 @@ function parsePage(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
+        dostupnost: "NA_STANJU",
+        kolicina_na_stanju: stanje,
         url: url.startsWith("http") ? url : BASE + url,
         izvor: "prodavnicaalata",
       });
@@ -152,6 +155,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(allProducts, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(allProducts, "prodavnicaalata");
 }
 
 main().catch(console.error);

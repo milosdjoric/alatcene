@@ -45,6 +45,7 @@ function extractProduct(p) {
     popust_procenat: popustProcenat,
     popust_iznos: popustIznos,
     valuta: "RSD",
+    dostupnost: v.available ? "NA_STANJU" : "RASPRODATO",
     url: `${BASE}/products/${p.handle}`,
     izvor: "sbt-alati",
   };
@@ -121,6 +122,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(unique, "sbt-alati");
 }
 
 main().catch(console.error);

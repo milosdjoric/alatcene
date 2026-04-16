@@ -1,65 +1,140 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import { createServerClient } from "@/lib/supabase/server";
+import { PAGE_SIZE } from "@/lib/constants";
+import type { Product } from "@/lib/types";
+import SearchBar from "@/components/SearchBar";
+import FilterSidebar from "@/components/FilterSidebar";
+import ProductGrid from "@/components/ProductGrid";
+import SortSelect from "@/components/SortSelect";
+import Pagination from "@/components/Pagination";
 
-export default function Home() {
+interface PageProps {
+  searchParams: Promise<Record<string, string | undefined>>;
+}
+
+async function fetchProducts(params: Record<string, string | undefined>) {
+  const supabase = createServerClient();
+
+  const q = params.q?.trim();
+  const brend = params.brend;
+  const izvor = params.izvor;
+  const dostupnost = params.dostupnost;
+  const cenaMin = params.cena_min;
+  const cenaMax = params.cena_max;
+  const sort = params.sort || "cena_asc";
+  const page = Math.max(1, parseInt(params.page || "1"));
+
+  let query = supabase.from("products").select("*", { count: "exact" });
+
+  if (q) query = query.ilike("naziv", `%${q}%`);
+  if (brend) query = query.eq("brend_normalized", brend);
+  if (izvor) query = query.eq("izvor", izvor);
+  if (dostupnost) query = query.eq("dostupnost", dostupnost);
+  if (cenaMin) query = query.gte("cena", parseInt(cenaMin));
+  if (cenaMax) query = query.lte("cena", parseInt(cenaMax));
+
+  switch (sort) {
+    case "cena_desc":
+      query = query.order("cena", { ascending: false });
+      break;
+    case "popust_desc":
+      query = query.order("popust_procenat", { ascending: false, nullsFirst: false });
+      break;
+    case "naziv_asc":
+      query = query.order("naziv", { ascending: true });
+      break;
+    case "newest":
+      query = query.order("updated_at", { ascending: false });
+      break;
+    default:
+      query = query.order("cena", { ascending: true });
+  }
+
+  const offset = (page - 1) * PAGE_SIZE;
+  query = query.range(offset, offset + PAGE_SIZE - 1);
+
+  const { data, count } = await query;
+
+  return {
+    products: (data ?? []) as Product[],
+    total: count ?? 0,
+    page,
+    totalPages: Math.ceil((count ?? 0) / PAGE_SIZE),
+  };
+}
+
+async function fetchBrands() {
+  const supabase = createServerClient();
+
+  const { data } = await supabase
+    .from("products")
+    .select("brend_normalized")
+    .not("brend_normalized", "is", null);
+
+  const counts: Record<string, number> = {};
+  for (const row of data ?? []) {
+    const b = row.brend_normalized;
+    counts[b] = (counts[b] || 0) + 1;
+  }
+
+  return Object.entries(counts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+export default async function Home({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const [result, brands] = await Promise.all([
+    fetchProducts(params),
+    fetchBrands(),
+  ]);
+
+  const page = parseInt(params.page || "1");
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      {/* Header */}
+      <header className="bg-white border-b border-zinc-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center gap-4">
+          <a href="/" className="text-xl font-bold text-zinc-900 flex-shrink-0">
+            cene<span className="text-blue-600">alata</span>.xyz
+          </a>
+          <Suspense>
+            <SearchBar />
+          </Suspense>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      {/* Main */}
+      <main className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <Suspense>
+            <FilterSidebar brands={brands} />
+          </Suspense>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+              <span className="text-sm text-zinc-500">
+                {result.total.toLocaleString("sr-RS")} rezultata
+              </span>
+              <Suspense>
+                <SortSelect />
+              </Suspense>
+            </div>
+            <ProductGrid products={result.products} />
+            <Suspense>
+              <Pagination totalPages={result.totalPages} currentPage={page} />
+            </Suspense>
+          </div>
         </div>
       </main>
-    </div>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-zinc-200 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 py-4 text-center text-sm text-zinc-400">
+          cenealata.xyz — Poređenje cena alata iz 17 srpskih prodavnica
+        </div>
+      </footer>
+    </>
   );
 }

@@ -66,7 +66,8 @@ function parseProducts(html) {
     }
 
     if (naziv && cena) {
-      products.push({ id, naziv, brend: extractBrand(naziv), cena, redovna_cena: redovnaCena, popust_procenat: popustProcenat, popust_iznos: popustIznos, valuta: "RSD", url: url.startsWith("http") ? url : BASE + url, izvor: "odigledolokomotive" });
+      const dostupnost = $el.find(".product-mark-sold").length > 0 ? "RASPRODATO" : "NA_STANJU";
+      products.push({ id, naziv, brend: extractBrand(naziv), cena, redovna_cena: redovnaCena, popust_procenat: popustProcenat, popust_iznos: popustIznos, valuta: "RSD", dostupnost, url: url.startsWith("http") ? url : BASE + url, izvor: "odigledolokomotive" });
     }
   });
   return products;
@@ -160,6 +161,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(unique, "odigledolokomotive");
 }
 
 main().catch(console.error);

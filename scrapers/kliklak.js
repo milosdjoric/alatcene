@@ -61,8 +61,10 @@ function parsePageProducts(html) {
     const isAku = url.includes("akumulatorsk") || naziv.toLowerCase().includes("aku");
     const parentKat = isAku ? "Akumulatorski alati" : "Električni alati";
 
+    const dostupnost = $el.find("a.product__add-to-cart").length > 0 ? "NA_STANJU" : "RASPRODATO";
+
     if (naziv && cena) {
-      products.push({ id, naziv, brend: extractBrand(naziv), cena, redovna_cena: redovnaCena, popust_procenat: popustProcenat, popust_iznos: popustIznos, valuta: "RSD", url, izvor: "kliklak", parent_kategorija: parentKat });
+      products.push({ id, naziv, brend: extractBrand(naziv), cena, redovna_cena: redovnaCena, popust_procenat: popustProcenat, popust_iznos: popustIznos, valuta: "RSD", dostupnost, url, izvor: "kliklak", parent_kategorija: parentKat });
     }
   });
 
@@ -112,6 +114,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(allProducts, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(allProducts, "kliklak");
 }
 
 main().catch(console.error);

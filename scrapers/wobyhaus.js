@@ -127,6 +127,8 @@ function parseProducts(html) {
     const idMatch = url.match(/\/(\d+)-/);
     const id = idMatch ? idMatch[1] : null;
 
+    const dostupnost = $parent.find(".buyButtonOnLists").length > 0 ? "NA_STANJU" : "RASPRODATO";
+
     if (cena) {
       products.push({
         id,
@@ -137,6 +139,7 @@ function parseProducts(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
+        dostupnost,
         url: url.startsWith("http") ? url : BASE + url,
         izvor: "wobyhaus",
       });
@@ -244,6 +247,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(unique, "wobyhaus");
 }
 
 main().catch(console.error);

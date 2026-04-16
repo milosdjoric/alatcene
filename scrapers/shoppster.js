@@ -41,7 +41,8 @@ function extractProduct(p) {
     ocena: p.averageRating ?? null,
     broj_recenzija: p.numberOfReviewComments ?? 0,
     url: `https://www.shoppster.rs/p/${p.code}`,
-    dostupnost: p.productStatus || null,
+    dostupnost: "NA_STANJU",
+    izvor: "shoppster",
   };
 }
 
@@ -120,8 +121,11 @@ async function main() {
 
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(allProducts, null, 2), "utf-8");
-
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(allProducts, "shoppster");
 }
 
 main().catch(console.error);

@@ -64,7 +64,8 @@ function parseProducts(html) {
     }
 
     if (naziv && cena) {
-      products.push({ id, sku, naziv, brend: extractBrand(naziv), cena, redovna_cena: redovnaCena, popust_procenat: popustProcenat, popust_iznos: popustIznos, valuta: "RSD", url, izvor: "axisshop" });
+      const dostupnost = $el.hasClass("outofstock") ? "RASPRODATO" : "NA_STANJU";
+      products.push({ id, sku, naziv, brend: extractBrand(naziv), cena, redovna_cena: redovnaCena, popust_procenat: popustProcenat, popust_iznos: popustIznos, valuta: "RSD", dostupnost, url, izvor: "axisshop" });
     }
   });
   return products;
@@ -117,6 +118,10 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
+
+  // DB upsert
+  const { upsertProducts } = require("./lib/db");
+  await upsertProducts(unique, "axisshop");
 }
 
 main().catch(console.error);
