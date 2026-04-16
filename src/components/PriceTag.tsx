@@ -1,5 +1,5 @@
 function formatPrice(price: number): string {
-  return price.toLocaleString("sr-RS") + " RSD";
+  return new Intl.NumberFormat("sr-RS").format(price);
 }
 
 export default function PriceTag({
@@ -15,18 +15,14 @@ export default function PriceTag({
 
   return (
     <div className="flex items-baseline gap-2 flex-wrap">
-      <span className="text-lg font-bold text-zinc-900">
+      <span className="text-xl font-bold text-slate-900 tracking-tight">
         {formatPrice(cena)}
+        <span className="text-sm font-medium text-slate-400 ml-1">RSD</span>
       </span>
       {hasDiscount && (
-        <>
-          <span className="text-sm text-zinc-400 line-through">
-            {formatPrice(redovna_cena)}
-          </span>
-          <span className="text-xs font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
-            -{popust_procenat}%
-          </span>
-        </>
+        <span className="text-xs text-slate-400 line-through">
+          {formatPrice(redovna_cena)}
+        </span>
       )}
     </div>
   );

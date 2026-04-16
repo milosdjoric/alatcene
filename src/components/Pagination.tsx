@@ -18,9 +18,9 @@ export default function Pagination({
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", String(page));
     router.push(`/?${params.toString()}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Prikaži max 7 stranica oko trenutne
   const pages: (number | "...")[] = [];
   if (totalPages <= 7) {
     for (let i = 1; i <= totalPages; i++) pages.push(i);
@@ -35,37 +35,39 @@ export default function Pagination({
   }
 
   return (
-    <div className="flex items-center justify-center gap-1 mt-8">
+    <div className="flex items-center justify-center gap-1.5 mt-10">
       <button
         onClick={() => goToPage(currentPage - 1)}
         disabled={currentPage <= 1}
-        className="px-3 py-2 rounded-lg text-sm text-zinc-600 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none disabled:hover:border-transparent transition-all"
       >
-        &larr;
+        &larr; Prethodna
       </button>
-      {pages.map((p, i) =>
-        p === "..." ? (
-          <span key={`dots-${i}`} className="px-2 text-zinc-400">...</span>
-        ) : (
-          <button
-            key={p}
-            onClick={() => goToPage(p)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              p === currentPage
-                ? "bg-blue-600 text-white"
-                : "text-zinc-600 hover:bg-zinc-100"
-            }`}
-          >
-            {p}
-          </button>
-        )
-      )}
+      <div className="flex items-center gap-1">
+        {pages.map((p, i) =>
+          p === "..." ? (
+            <span key={`dots-${i}`} className="px-2 text-slate-400 text-sm">...</span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => goToPage(p)}
+              className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
+                p === currentPage
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
+                  : "text-slate-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200"
+              }`}
+            >
+              {p}
+            </button>
+          )
+        )}
+      </div>
       <button
         onClick={() => goToPage(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="px-3 py-2 rounded-lg text-sm text-zinc-600 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none disabled:hover:border-transparent transition-all"
       >
-        &rarr;
+        Sledeća &rarr;
       </button>
     </div>
   );

@@ -90,38 +90,61 @@ export default async function Home({ searchParams }: PageProps) {
   ]);
 
   const page = parseInt(params.page || "1");
+  const q = params.q || "";
 
   return (
     <>
       {/* Header */}
-      <header className="bg-white border-b border-zinc-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center gap-4">
-          <a href="/" className="text-xl font-bold text-zinc-900 flex-shrink-0">
-            cene<span className="text-blue-600">alata</span>.xyz
-          </a>
-          <Suspense>
-            <SearchBar />
-          </Suspense>
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-16 gap-6">
+            <a href="/" className="flex items-center gap-1 flex-shrink-0">
+              <span className="text-xl font-bold tracking-tight text-slate-900">cene</span>
+              <span className="text-xl font-bold tracking-tight text-blue-600">alata</span>
+              <span className="text-sm text-slate-400 font-medium">.xyz</span>
+            </a>
+            <div className="flex-1 max-w-2xl">
+              <Suspense>
+                <SearchBar />
+              </Suspense>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
+              <span className="bg-slate-100 px-2 py-1 rounded-md font-medium">17 prodavnica</span>
+              <span className="bg-slate-100 px-2 py-1 rounded-md font-medium">34k+ alata</span>
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main */}
-      <main className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-        <div className="flex gap-6">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+        <div className="lg:flex lg:gap-8">
           {/* Sidebar */}
           <Suspense>
             <FilterSidebar brands={brands} />
           </Suspense>
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
-              <span className="text-sm text-zinc-500">
-                {result.total.toLocaleString("sr-RS")} rezultata
-              </span>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            {/* Toolbar */}
+            <div className="flex items-center justify-between mb-6 gap-4">
+              <div>
+                {q && (
+                  <h1 className="text-lg font-semibold text-slate-900 mb-0.5">
+                    Rezultati za &quot;{q}&quot;
+                  </h1>
+                )}
+                <p className="text-sm text-slate-500">
+                  {result.total.toLocaleString("sr-RS")} {result.total === 1 ? "proizvod" : result.total < 5 ? "proizvoda" : "proizvoda"}
+                </p>
+              </div>
               <Suspense>
                 <SortSelect />
               </Suspense>
             </div>
+
             <ProductGrid products={result.products} />
+
             <Suspense>
               <Pagination totalPages={result.totalPages} currentPage={page} />
             </Suspense>
@@ -130,9 +153,18 @@ export default async function Home({ searchParams }: PageProps) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-zinc-200 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 py-4 text-center text-sm text-zinc-400">
-          cenealata.xyz — Poređenje cena alata iz 17 srpskih prodavnica
+      <footer className="bg-white border-t border-slate-200 mt-auto">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-900">cenealata.xyz</span>
+              <span className="text-slate-400">—</span>
+              <span className="text-sm text-slate-500">Poređenje cena alata iz 17 prodavnica</span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Cene se ažuriraju svakog dana u 06:00
+            </p>
+          </div>
         </div>
       </footer>
     </>
