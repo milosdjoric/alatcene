@@ -1,0 +1,33 @@
+{
+  "name": "alatcene",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "scrape:shoppster": "node scrapers/shoppster.js",
+    "scrape:gama": "node scrapers/gama-alati.js",
+    "scrape:superalati": "node scrapers/superalati.js",
+    "scrape:prodavnicaalata": "node scrapers/prodavnicaalata.js",
+    "scrape:wobyhaus": "node scrapers/wobyhaus.js",
+    "scrape:timkomerc": "node scrapers/timkomerc.js",
+    "scrape:amcarco": "node scrapers/amcarco.js",
+    "scrape:omni": "node scrapers/omni-alati.js",
+    "scrape:sbt": "node scrapers/sbt-alati.js",
+    "scrape:najpovoljniji": "node scrapers/najpovoljnijialati.js",
+    "scrape:eplaneta": "node scrapers/eplaneta.js",
+    "scrape:metalflex": "node scrapers/metalflex.js",
+    "scrape:simns": "node scrapers/simns.js",
+    "scrape:bosshop": "node scrapers/bosshop.js",
+    "scrape:axisshop": "node scrapers/axisshop.js",
+    "scrape:kliklak": "node scrapers/kliklak.js",
+    "scrape:odl": "node scrapers/odigledolokomotive.js",
+    "scrape:all": "node scrape-all.js",
+    "serve": "npx serve . -l 3456"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  }
+}

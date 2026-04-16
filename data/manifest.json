@@ -1,0 +1,90 @@
+{
+  "updated": "2026-04-16T13:20:17.382Z",
+  "sources": [
+    {
+      "source": "amcarco",
+      "file": "amcarco_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "axisshop",
+      "file": "axisshop_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "bosshop",
+      "file": "bosshop_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "eplaneta",
+      "file": "eplaneta_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "gama",
+      "file": "gama_2026-04-15.json",
+      "date": "2026-04-15"
+    },
+    {
+      "source": "kliklak",
+      "file": "kliklak_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "metalflex",
+      "file": "metalflex_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "najpovoljnijialati",
+      "file": "najpovoljnijialati_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "odigledolokomotive",
+      "file": "odigledolokomotive_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "omni-alati",
+      "file": "omni-alati_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "prodavnicaalata",
+      "file": "prodavnicaalata_2026-04-15.json",
+      "date": "2026-04-15"
+    },
+    {
+      "source": "sbt-alati",
+      "file": "sbt-alati_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "shoppster",
+      "file": "shoppster_2026-04-15.json",
+      "date": "2026-04-15"
+    },
+    {
+      "source": "simns",
+      "file": "simns_2026-04-16.json",
+      "date": "2026-04-16"
+    },
+    {
+      "source": "superalati",
+      "file": "superalati_2026-04-15.json",
+      "date": "2026-04-15"
+    },
+    {
+      "source": "timkomerc",
+      "file": "timkomerc_2026-04-15.json",
+      "date": "2026-04-15"
+    },
+    {
+      "source": "wobyhaus",
+      "file": "wobyhaus_2026-04-15.json",
+      "date": "2026-04-15"
+    }
+  ]
+}

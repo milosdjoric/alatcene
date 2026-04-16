@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="sr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alatcene — Pretraga alata</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 8px;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #888;
+        margin-bottom: 32px;
+        font-size: 14px;
+      }
+
+      .search-wrapper {
+        position: relative;
+      }
+
+      #search {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        outline: none;
+        background: #fff;
+        transition: border-color 0.2s;
+      }
+
+      #search:focus {
+        border-color: #e3131b;
+      }
+
+      .price-current {
+        font-weight: 700;
+        color: #e3131b;
+        font-size: 14px;
+      }
+
+      .price-old {
+        font-size: 11px;
+        color: #aaa;
+        text-decoration: line-through;
+      }
+
+      .discount-badge {
+        background: #e3131b;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 6px;
+      }
+
+      .source-badge {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #fff;
+        white-space: nowrap;
+      }
+
+      .source-badge--shoppster {
+        background: #e3131b;
+      }
+
+      .source-badge--gama-alati {
+        background: #1a73e8;
+      }
+
+      .source-badge--superalati {
+        background: #f59e0b;
+      }
+
+      .source-badge--prodavnicaalata {
+        background: #16a34a;
+      }
+
+      .source-badge--wobyhaus {
+        background: #7c3aed;
+      }
+
+      .source-badge--timkomerc {
+        background: #0891b2;
+      }
+
+      .source-badge--amcarco {
+        background: #dc2626;
+      }
+
+      .source-badge--omni-alati {
+        background: #ea580c;
+      }
+
+      .source-badge--sbt-alati {
+        background: #4f46e5;
+      }
+
+      .source-badge--najpovoljnijialati {
+        background: #059669;
+      }
+
+      .source-badge--eplaneta {
+        background: #9333ea;
+      }
+
+      .source-badge--metalflex {
+        background: #78716c;
+      }
+
+      .source-badge--simns {
+        background: #0d9488;
+      }
+
+      .source-badge--bosshop {
+        background: #b91c1c;
+      }
+
+      .source-badge--axisshop {
+        background: #ca8a04;
+      }
+
+      .source-badge--kliklak {
+        background: #65a30d;
+      }
+
+      .source-badge--odigledolokomotive {
+        background: #2563eb;
+      }
+
+
+      #results {
+        margin-top: 24px;
+      }
+
+      .results-header {
+        font-size: 13px;
+        color: #888;
+        margin-bottom: 12px;
+        padding: 0 4px;
+      }
+
+      .product-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        transition: box-shadow 0.2s;
+      }
+
+      .product-card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .product-card a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .product-card a:hover {
+        text-decoration: underline;
+      }
+
+      .product-info {
+        flex: 1;
+      }
+
+      .product-name {
+        font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+
+      .product-meta {
+        font-size: 12px;
+        color: #999;
+      }
+
+      .product-prices {
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .filters {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        padding: 6px 14px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        background: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .filter-btn:hover {
+        border-color: #e3131b;
+        color: #e3131b;
+      }
+
+      .filter-btn.active {
+        background: #e3131b;
+        color: #fff;
+        border-color: #e3131b;
+      }
+
+      .sort-bar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 12px;
+      }
+
+      .sort-bar label {
+        font-size: 13px;
+        color: #888;
+      }
+
+      .sort-bar select {
+        padding: 4px 8px;
+        font-size: 13px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      .stats {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 12px;
+        color: #bbb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Alatcene</h1>
+      <p class="subtitle">
+        Pretraga cena alata — <span id="total-count">0</span> proizvoda
+      </p>
+
+      <div class="search-wrapper">
+        <input
+          type="text"
+          id="search"
+          placeholder="Pretraži alate... (npr. Bosch bušilica)"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="filters" id="filters"></div>
+
+      <div class="sort-bar">
+        <label for="sort">Sortiraj:</label>
+        <select id="sort">
+          <option value="relevance">Relevantnost</option>
+          <option value="price-asc">Cena ↑</option>
+          <option value="price-desc">Cena ↓</option>
+          <option value="discount">Popust ↓</option>
+          <option value="name">Naziv A-Z</option>
+        </select>
+      </div>
+
+      <div id="results"></div>
+
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <script>
+      let products = [];
+      let activeCategory = null;
+
+      let activeSource = null;
+
+      const SOURCES = {
+        shoppster: { label: "Shoppster", color: "#e3131b" },
+        "gama-alati": { label: "Gama Alati", color: "#1a73e8" },
+        superalati: { label: "Super Alati", color: "#f59e0b" },
+        prodavnicaalata: { label: "Prodavnica Alata", color: "#16a34a" },
+        wobyhaus: { label: "Woby Haus", color: "#7c3aed" },
+        timkomerc: { label: "Tim Komerc", color: "#0891b2" },
+        amcarco: { label: "Amcarco", color: "#dc2626" },
+        "omni-alati": { label: "Omni Alati", color: "#ea580c" },
+        "sbt-alati": { label: "SBT Alati", color: "#4f46e5" },
+        najpovoljnijialati: { label: "Najpovoljniji Alati", color: "#059669" },
+        eplaneta: { label: "ePlaneta", color: "#9333ea" },
+        metalflex: { label: "Metalflex", color: "#78716c" },
+        simns: { label: "SIM NS", color: "#0d9488" },
+        bosshop: { label: "B.O.S. Shop", color: "#b91c1c" },
+        axisshop: { label: "Axis Shop", color: "#ca8a04" },
+        kliklak: { label: "KlikLak", color: "#65a30d" },
+        odigledolokomotive: { label: "Od Igle Do Lokomotive", color: "#2563eb" },
+      };
+
+      async function loadData() {
+        // Učitaj manifest koji generiše scrape-all.js
+        const manifest = await fetch("data/manifest.json")
+          .then((r) => r.json())
+          .catch(() => null);
+
+        let files;
+        if (manifest) {
+          files = manifest.sources.map((s) => s.file);
+        } else {
+          // Fallback: hardkodirani fajlovi
+          files = [
+            "shoppster_2026-04-15.json", "gama_2026-04-15.json",
+            "superalati_2026-04-15.json", "prodavnicaalata_2026-04-15.json",
+            "wobyhaus_2026-04-15.json", "timkomerc_2026-04-15.json",
+            "amcarco_2026-04-16.json", "omni-alati_2026-04-16.json",
+            "sbt-alati_2026-04-16.json", "najpovoljnijialati_2026-04-16.json",
+            "eplaneta_2026-04-16.json", "metalflex_2026-04-16.json",
+            "simns_2026-04-16.json", "bosshop_2026-04-16.json",
+            "axisshop_2026-04-16.json", "kliklak_2026-04-16.json",
+            "odigledolokomotive_2026-04-16.json",
+          ];
+        }
+
+        const results = await Promise.all(
+          files.map((f) =>
+            fetch(`data/${f}`)
+              .then((r) => (r.ok ? r.json() : []))
+              .then((data) =>
+                // Shoppster nema izvor u starim fajlovima
+                data[0] && !data[0].izvor
+                  ? data.map((p) => ({
+                      ...p,
+                      izvor: f.split("_")[0],
+                    }))
+                  : data
+              )
+              .catch(() => [])
+          )
+        );
+
+        products = results.flat();
+
+        // Standardizuj nazive kategorija
+        const CATEGORY_MAP = {
+          "aku alati": "Akumulatorski alati",
+          "akumulatorski alat": "Akumulatorski alati",
+          "akumulatorski alati": "Akumulatorski alati",
+          "električni alat": "Električni alati",
+          "električni alati": "Električni alati",
+          "elektricni alat": "Električni alati",
+        };
+        for (const p of products) {
+          const key = (p.parent_kategorija || "").toLowerCase();
+          if (CATEGORY_MAP[key]) p.parent_kategorija = CATEGORY_MAP[key];
+        }
+        document.getElementById("total-count").textContent =
+          products.length.toLocaleString("sr");
+
+        // Filteri po izvoru
+        const filtersEl = document.getElementById("filters");
+        Object.entries(SOURCES).forEach(([key, src]) => {
+          const count = products.filter((p) => p.izvor === key).length;
+          const btn = document.createElement("button");
+          btn.className = "filter-btn source-btn";
+          btn.textContent = `${src.label} (${count.toLocaleString("sr")})`;
+          btn.dataset.source = key;
+          btn.onclick = () => toggleSource(btn, key);
+          filtersEl.appendChild(btn);
+        });
+
+        // Separator
+        const sep = document.createElement("span");
+        sep.textContent = "|";
+        sep.style.cssText = "color:#ddd;line-height:32px";
+        filtersEl.appendChild(sep);
+
+        // Filteri po kategorijama
+        const categories = [
+          ...new Set(products.map((p) => p.parent_kategorija)),
+        ];
+        categories.forEach((cat) => {
+          const btn = document.createElement("button");
+          btn.className = "filter-btn cat-btn";
+          btn.textContent = cat;
+          btn.onclick = () => toggleCategory(btn, cat);
+          filtersEl.appendChild(btn);
+        });
+      }
+
+      function toggleSource(btn, source) {
+        if (activeSource === source) {
+          activeSource = null;
+          btn.classList.remove("active");
+        } else {
+          document
+            .querySelectorAll(".source-btn")
+            .forEach((b) => b.classList.remove("active"));
+          activeSource = source;
+          btn.classList.add("active");
+        }
+        const query = document.getElementById("search").value.trim();
+        if (query.length >= 2) showResults(query);
+      }
+
+      function toggleCategory(btn, cat) {
+        if (activeCategory === cat) {
+          activeCategory = null;
+          btn.classList.remove("active");
+        } else {
+          document
+            .querySelectorAll(".filter-btn")
+            .forEach((b) => b.classList.remove("active"));
+          activeCategory = cat;
+          btn.classList.add("active");
+        }
+        const query = document.getElementById("search").value.trim();
+        if (query.length >= 2) showResults(query);
+      }
+
+      function formatPrice(val) {
+        if (!val) return "";
+        return val.toLocaleString("sr") + " RSD";
+      }
+
+      function highlightMatch(text, query) {
+        if (!query) return text;
+        const words = query
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 0);
+        let result = text;
+        words.forEach((word) => {
+          const regex = new RegExp(
+            `(${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+            "gi"
+          );
+          result = result.replace(regex, "<mark>$1</mark>");
+        });
+        return result;
+      }
+
+      function searchProducts(query) {
+        const words = query
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 0);
+
+        let filtered = products.filter((p) => {
+          const haystack = `${p.naziv} ${p.brend || ""} ${p.kategorija || ""}`.toLowerCase();
+          return words.every((w) => haystack.includes(w));
+        });
+
+        if (activeSource) {
+          filtered = filtered.filter((p) => p.izvor === activeSource);
+        }
+
+        if (activeCategory) {
+          filtered = filtered.filter(
+            (p) => p.parent_kategorija === activeCategory
+          );
+        }
+
+        return filtered;
+      }
+
+      function sortProducts(list) {
+        const sortBy = document.getElementById("sort").value;
+        const sorted = [...list];
+
+        switch (sortBy) {
+          case "price-asc":
+            sorted.sort((a, b) => (a.cena || 0) - (b.cena || 0));
+            break;
+          case "price-desc":
+            sorted.sort((a, b) => (b.cena || 0) - (a.cena || 0));
+            break;
+          case "discount":
+            sorted.sort(
+              (a, b) => (b.popust_procenat || 0) - (a.popust_procenat || 0)
+            );
+            break;
+          case "name":
+            sorted.sort((a, b) => a.naziv.localeCompare(b.naziv, "sr"));
+            break;
+        }
+
+        return sorted;
+      }
+
+      function showResults(query) {
+        const el = document.getElementById("results");
+
+        if (query.length < 2) {
+          el.innerHTML = "";
+          document.getElementById("stats").textContent = "";
+          return;
+        }
+
+        const matches = sortProducts(searchProducts(query));
+        const shown = matches.slice(0, 100);
+
+        document.getElementById("stats").textContent =
+          matches.length > 100
+            ? `Prikazano 100 od ${matches.length} rezultata`
+            : "";
+
+        el.innerHTML =
+          `<div class="results-header">${matches.length} rezultata</div>` +
+          shown
+            .map(
+              (p) => `
+            <div class="product-card">
+              <div class="product-info">
+                <div class="product-name">
+                  <a href="${p.url}" target="_blank">${highlightMatch(p.naziv, query)}</a>
+                </div>
+                <div class="product-meta">
+                  <span class="source-badge source-badge--${p.izvor}">${SOURCES[p.izvor]?.label || p.izvor}</span>
+                  ${p.brend || ""} · ${p.kategorija || ""} · ${p.parent_kategorija}
+                  ${p.ocena ? ` · ⭐ ${p.ocena}` : ""}
+                </div>
+              </div>
+              <div class="product-prices">
+                <div class="price-current">${formatPrice(p.cena)}</div>
+                ${p.redovna_cena && p.redovna_cena !== p.cena ? `<div class="price-old">${formatPrice(p.redovna_cena)}</div>` : ""}
+                ${p.popust_procenat ? `<span class="discount-badge">-${p.popust_procenat}%</span>` : ""}
+              </div>
+            </div>
+          `
+            )
+            .join("");
+      }
+
+      // Event listeners
+      const searchInput = document.getElementById("search");
+
+      searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.trim();
+        showResults(query);
+      });
+
+      document.getElementById("sort").addEventListener("change", () => {
+        const query = searchInput.value.trim();
+        if (query.length >= 2) showResults(query);
+      });
+
+      loadData();
+    </script>
+  </body>
+</html>
