@@ -1,0 +1,27 @@
+name: Daily Scrape
+
+on:
+  schedule:
+    - cron: "0 4 * * *" # 04:00 UTC = 06:00 Belgrade
+  workflow_dispatch: # manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run all scrapers
+        run: node scrape-all.js
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
