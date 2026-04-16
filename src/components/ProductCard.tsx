@@ -10,11 +10,11 @@ export default function ProductCard({ product }: { product: Product }) {
       href={product.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`group relative flex flex-col bg-white rounded-2xl border border-slate-200 p-5 transition-all duration-200 hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5 ${outOfStock ? "opacity-60" : ""}`}
+      className={`group relative flex flex-col bg-[#16181d] border border-[#2a2d35] p-4 transition-all duration-200 hover:border-[#c8e64a]/40 cursor-pointer ${outOfStock ? "opacity-40" : ""}`}
     >
       {/* Popust badge */}
       {product.popust_procenat && product.popust_procenat >= 10 && (
-        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm">
+        <div className="absolute top-0 right-0 bg-[#c8e64a] text-[#0c0d10] text-[11px] font-bold px-2 py-0.5">
           -{product.popust_procenat}%
         </div>
       )}
@@ -22,19 +22,19 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="flex items-center justify-between mb-3">
         <SourceBadge izvor={product.izvor} />
         {outOfStock && (
-          <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Rasprodato</span>
+          <span className="text-[10px] uppercase tracking-wider text-[#555963]">rasprodato</span>
         )}
       </div>
 
-      <h3 className="text-[13px] leading-snug font-medium text-slate-700 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors min-h-[2.5rem]">
+      <h3 className="text-[13px] leading-snug font-medium text-[#8b8f9a] line-clamp-2 mb-2 group-hover:text-[#e0e2e7] transition-colors min-h-[2.5rem]">
         {product.naziv}
       </h3>
 
       {product.brend_normalized && (
-        <span className="text-xs text-slate-400 font-medium mb-3">{product.brend_normalized}</span>
+        <span className="text-xs text-[#555963] mb-3">{product.brend_normalized}</span>
       )}
 
-      <div className="mt-auto pt-3 border-t border-slate-100">
+      <div className="mt-auto pt-3 border-t border-[#2a2d35]">
         <PriceTag
           cena={product.cena}
           redovna_cena={product.redovna_cena}
@@ -42,11 +42,8 @@ export default function ProductCard({ product }: { product: Product }) {
         />
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-50 rounded-lg py-1.5">
-        <span>Pogledaj na sajtu</span>
-        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-        </svg>
+      <div className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-[#c8e64a] opacity-0 group-hover:opacity-100 transition-opacity bg-[#c8e64a]/10 py-1.5">
+        <span>Pogledaj →</span>
       </div>
     </a>
   );

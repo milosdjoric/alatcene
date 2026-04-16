@@ -40,7 +40,7 @@ export default function SearchBar() {
   return (
     <div className="relative w-full">
       <svg
-        className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
+        className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#555963]"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -57,13 +57,13 @@ export default function SearchBar() {
         type="text"
         defaultValue={q}
         onChange={(e) => handleInput(e.target.value)}
-        placeholder="Pretraži alate... (npr. Bosch brusilica)"
-        className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 focus:bg-white transition-all"
+        placeholder="Pretraži alate..."
+        className="w-full pl-10 pr-10 py-2.5 rounded-none border border-[#2a2d35] bg-[#0c0d10] text-[#e0e2e7] text-sm placeholder:text-[#555963] focus:outline-none focus:border-[#c8e64a] transition-colors"
       />
       {q && (
         <button
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555963] hover:text-[#c8e64a] transition-colors cursor-pointer"
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

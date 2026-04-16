@@ -1,16 +1,36 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #f8fafc;
-  --color-foreground: #0f172a;
-  --color-primary: #2563eb;
-  --color-primary-dark: #1d4ed8;
-  --color-accent: #f59e0b;
-  --font-sans: var(--font-geist);
+  /* Dark Industrial palette */
+  --color-background: #0c0d10;
+  --color-foreground: #e0e2e7;
+  --color-surface: #16181d;
+  --color-surface-hover: #1e2027;
+  --color-border: #2a2d35;
+  --color-border-hover: #3a3d45;
+
+  /* Accent — safety lime */
+  --color-accent: #c8e64a;
+  --color-accent-dark: #a8c230;
+  --color-accent-dim: rgba(200, 230, 74, 0.12);
+
+  /* Functional */
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-muted: #6b7280;
+
+  /* Text */
+  --color-text-primary: #e0e2e7;
+  --color-text-secondary: #8b8f9a;
+  --color-text-muted: #555963;
+
+  /* Font */
+  --font-sans: var(--font-main);
 }
 
 * {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
@@ -18,7 +38,7 @@ body {
   color: var(--color-foreground);
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — dark */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -26,6 +46,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #2a2d35;
   border-radius: 3px;
 }
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3d45;
+}
+
+/* All text uses Space Grotesk via body font */

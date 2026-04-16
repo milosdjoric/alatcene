@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-geist",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-main",
   subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -19,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sr" className={`${inter.variable} h-full`}>
-      <body className="min-h-full flex flex-col bg-[#f8fafc] font-[var(--font-geist)] text-slate-900 antialiased">
+    <html lang="sr" className={`${spaceGrotesk.variable} h-full`}>
+      <body className="min-h-full flex flex-col bg-[#0c0d10] font-[var(--font-main)] text-[#e0e2e7] antialiased">
         {children}
       </body>
     </html>

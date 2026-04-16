@@ -7,8 +7,8 @@ export default function SourceBadge({ izvor }: { izvor: string }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold tracking-wide uppercase"
-      style={{ backgroundColor: color + "18", color }}
+      className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase"
+      style={{ backgroundColor: color + "20", color }}
     >
       <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
       {label}
