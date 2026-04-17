@@ -19,7 +19,7 @@ export default function SortSelect() {
     <select
       value={currentSort}
       onChange={(e) => handleChange(e.target.value)}
-      className="px-3 py-2 rounded-none border border-[#2a2d35] bg-[#16181d] text-sm text-[#8b8f9a] focus:outline-none focus:border-[#c8e64a] cursor-pointer transition-colors"
+      className="px-3 py-2.5 rounded-none border border-[#2a2d35] bg-[#16181d] text-sm text-[#8b8f9a] focus:outline-none focus:border-[#c8e64a] cursor-pointer transition-colors"
     >
       {SORT_OPTIONS.map((opt) => (
         <option key={opt.value} value={opt.value}>

@@ -24,6 +24,17 @@ function getClient() {
 
 const { normalizeBrand } = require(path.join(__dirname, "..", "..", "scripts", "lib", "brand-normalize"));
 
+const PARENT_KATEGORIJA_MAP = {
+  "Električni alat": "Električni alati",
+  "Akumulatorski alat": "Akumulatorski alati",
+  "Aku alati": "Akumulatorski alati",
+};
+
+function normalizeParentKategorija(raw) {
+  if (!raw) return null;
+  return PARENT_KATEGORIJA_MAP[raw] || raw;
+}
+
 async function upsertProducts(products, izvor) {
   const supabase = getClient();
   if (!supabase) {
@@ -48,7 +59,7 @@ async function upsertProducts(products, izvor) {
       brend: p.brend || null,
       brend_normalized: normalizeBrand(p.brend),
       kategorija: p.kategorija || null,
-      parent_kategorija: p.parent_kategorija || null,
+      parent_kategorija: normalizeParentKategorija(p.parent_kategorija),
       cena: Math.round(p.cena),
       redovna_cena: p.redovna_cena ? Math.round(p.redovna_cena) : null,
       popust_procenat: p.popust_procenat || null,

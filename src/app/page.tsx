@@ -2,110 +2,55 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
 import { PAGE_SIZE } from "@/lib/constants";
-import type { Product } from "@/lib/types";
+import type { Product, GroupedSearchResponse } from "@/lib/types";
 import SearchBar from "@/components/SearchBar";
 import FilterSidebar from "@/components/FilterSidebar";
 import ActiveFilters from "@/components/ActiveFilters";
-import ProductGrid from "@/components/ProductGrid";
+import ProductGroupGrid from "@/components/ProductGroupGrid";
+import ProductGroupList from "@/components/ProductGroupList";
 import SortSelect from "@/components/SortSelect";
 import Pagination from "@/components/Pagination";
 import ProductCard from "@/components/ProductCard";
-import ProductList from "@/components/ProductList";
 import ViewToggle from "@/components/ViewToggle";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
 }
 
-async function fetchProducts(params: Record<string, string | undefined>) {
+async function fetchGroupedProducts(params: Record<string, string | undefined>): Promise<GroupedSearchResponse> {
   const supabase = createServerClient();
 
-  const q = params.q?.trim();
-  const brend = params.brend;
-  const izvor = params.izvor;
-  const kategorija = params.kategorija;
-  const dostupnost = params.dostupnost;
-  const cenaMin = params.cena_min;
-  const cenaMax = params.cena_max;
-  const sort = params.sort || "cena_asc";
-  const page = Math.max(1, parseInt(params.page || "1"));
+  const { data, error } = await supabase.rpc("search_grouped", {
+    search_query: params.q?.trim() || null,
+    filter_brend: params.brend || null,
+    filter_izvor: params.izvor || null,
+    filter_kategorija: params.kategorija || null,
+    filter_dostupnost: params.dostupnost || null,
+    filter_cena_min: params.cena_min ? parseInt(params.cena_min) : null,
+    filter_cena_max: params.cena_max ? parseInt(params.cena_max) : null,
+    sort_by: params.sort || "cena_asc",
+    page_num: Math.max(1, parseInt(params.page || "1")),
+    page_size: PAGE_SIZE,
+  });
 
-  let query = supabase.from("products").select("*", { count: "exact" });
-
-  if (q) query = query.ilike("naziv", `%${q}%`);
-  if (brend) query = query.eq("brend_normalized", brend);
-  if (izvor) query = query.eq("izvor", izvor);
-  if (kategorija) query = query.eq("parent_kategorija", kategorija);
-  if (dostupnost) query = query.eq("dostupnost", dostupnost);
-  if (cenaMin) query = query.gte("cena", parseInt(cenaMin));
-  if (cenaMax) query = query.lte("cena", parseInt(cenaMax));
-
-  switch (sort) {
-    case "cena_desc":
-      query = query.order("cena", { ascending: false });
-      break;
-    case "popust_desc":
-      query = query.order("popust_procenat", { ascending: false, nullsFirst: false });
-      break;
-    case "naziv_asc":
-      query = query.order("naziv", { ascending: true });
-      break;
-    case "newest":
-      query = query.order("updated_at", { ascending: false });
-      break;
-    default:
-      query = query.order("cena", { ascending: true });
+  if (error) {
+    console.error("search_grouped error:", error);
+    return { groups: [], total: 0, page: 1, totalPages: 0 };
   }
 
-  const offset = (page - 1) * PAGE_SIZE;
-  query = query.range(offset, offset + PAGE_SIZE - 1);
-
-  const { data, count } = await query;
-
-  return {
-    products: (data ?? []) as Product[],
-    total: count ?? 0,
-    page,
-    totalPages: Math.ceil((count ?? 0) / PAGE_SIZE),
-  };
+  return data as GroupedSearchResponse;
 }
 
 async function fetchBrands() {
   const supabase = createServerClient();
-
-  const { data } = await supabase
-    .from("products")
-    .select("brend_normalized")
-    .not("brend_normalized", "is", null);
-
-  const counts: Record<string, number> = {};
-  for (const row of data ?? []) {
-    const b = row.brend_normalized;
-    counts[b] = (counts[b] || 0) + 1;
-  }
-
-  return Object.entries(counts)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+  const { data } = await supabase.rpc("get_brand_counts");
+  return (data ?? []) as { name: string; count: number }[];
 }
 
 async function fetchCategories() {
   const supabase = createServerClient();
-
-  const { data } = await supabase
-    .from("products")
-    .select("parent_kategorija")
-    .not("parent_kategorija", "is", null);
-
-  const counts: Record<string, number> = {};
-  for (const row of data ?? []) {
-    const k = row.parent_kategorija;
-    counts[k] = (counts[k] || 0) + 1;
-  }
-
-  return Object.entries(counts)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+  const { data } = await supabase.rpc("get_category_counts");
+  return (data ?? []) as { name: string; count: number }[];
 }
 
 async function fetchTopDeals() {
@@ -132,7 +77,7 @@ export default async function Home({ searchParams }: PageProps) {
   const isLanding = !hasActiveFilters(params);
 
   const [result, brands, categories, topDeals] = await Promise.all([
-    fetchProducts(params),
+    fetchGroupedProducts(params),
     fetchBrands(),
     fetchCategories(),
     isLanding ? fetchTopDeals() : Promise.resolve([]),
@@ -140,19 +85,20 @@ export default async function Home({ searchParams }: PageProps) {
 
   const page = parseInt(params.page || "1");
   const q = params.q || "";
-  const view = params.prikaz || "grid";
+  const view = params.prikaz || "lista";
 
   return (
     <>
-      {/* Header */}
-      <header className="bg-[#16181d] border-b border-[#2a2d35] sticky top-0 z-40">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-14 gap-3 sm:gap-6">
+      {/* Header — floating glassmorphism */}
+      <div className="sticky top-0 z-40 px-4 sm:px-6 lg:px-8 pt-3">
+        <header className="max-w-[1400px] mx-auto bg-[#16181d]/80 backdrop-blur-xl border border-[#2a2d35]/60 rounded-lg shadow-lg shadow-black/20">
+          <div className="flex items-center h-12 px-4 gap-4">
             <a href="/" className="flex items-center gap-0.5 flex-shrink-0">
               <span className="text-lg font-bold tracking-tight text-[#e0e2e7]">cene</span>
               <span className="text-lg font-bold tracking-tight text-[#c8e64a]">alata</span>
-              <span className="text-xs text-[#555963] font-normal ml-0.5">.xyz</span>
+              <span className="text-[10px] text-[#555963] font-normal ml-0.5">.xyz</span>
             </a>
+
             {!isLanding && (
               <div className="flex-1 max-w-2xl">
                 <Suspense>
@@ -160,14 +106,19 @@ export default async function Home({ searchParams }: PageProps) {
                 </Suspense>
               </div>
             )}
-            <div className="hidden sm:flex items-center gap-3 text-xs text-[#8b8f9a] ml-auto">
-              <span>19 prodavnica</span>
-              <span className="text-[#2a2d35]">/</span>
-              <span>41k+ alata</span>
+
+            <div className="hidden sm:flex items-center gap-3 text-[11px] text-[#555963] ml-auto">
+              <span><span className="text-[#8b8f9a]">19</span> prod.</span>
+              <span className="w-px h-3 bg-[#2a2d35]" />
+              <span><span className="text-[#8b8f9a]">{result.total.toLocaleString("sr-RS")}</span> alata</span>
             </div>
+
+            <Link href="/info" className="text-[11px] text-[#555963] hover:text-[#c8e64a] transition-colors">
+              info
+            </Link>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {/* Hero — samo na landing-u */}
       {isLanding && (
@@ -268,9 +219,9 @@ export default async function Home({ searchParams }: PageProps) {
               </div>
 
               {view === "lista" ? (
-                <ProductList products={result.products} />
+                <ProductGroupList groups={result.groups} />
               ) : (
-                <ProductGrid products={result.products} />
+                <ProductGroupGrid groups={result.groups} />
               )}
 
               <Suspense>

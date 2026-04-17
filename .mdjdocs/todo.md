@@ -39,7 +39,21 @@
 - [ ] Modifikovati svih 17 scrapera da koriste db.js
 - [ ] Ažurirati scrape-all.js (cleanup starih proizvoda)
 
-### 6. Deploy
+### 6. Product Matching
+- [x] SQL migracija: match_key + extracted_model kolone + indeks
+- [x] scripts/lib/model-extract.js — extraction funkcija (SKU → regex → NULL)
+- [x] scripts/match-products.js — batch skripta
+- [x] Pokrenuti i verifikovati matching rezultate (81%+ matched, 6300+ grupa sa 2+ ponude)
+- [x] GitHub Actions: dodati matching korak posle scrape-a
+- [x] Supabase RPC: search_grouped + bulk_update_match_keys
+- [x] src/lib/types.ts — ProductGroup, ProductOffer, GroupedSearchResponse
+- [x] src/components/ProductGroupCard.tsx
+- [x] src/components/ProductGroupGrid.tsx
+- [x] src/app/proizvod/[matchKey]/page.tsx — stranica za poređenje cena
+- [x] src/app/page.tsx — prebaciti na grupisane rezultate
+- [ ] Testirati end-to-end u browseru
+
+### 7. Deploy
 - [ ] GitHub repo + push
 - [ ] Vercel import + env varijable
 - [ ] .github/workflows/scrape.yml (cron 0 4 * * * UTC = 6h srpsko)

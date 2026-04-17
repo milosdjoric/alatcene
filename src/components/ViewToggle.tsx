@@ -5,11 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function ViewToggle() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const view = searchParams.get("prikaz") || "grid";
+  const view = searchParams.get("prikaz") || "lista";
 
   function setView(v: string) {
     const params = new URLSearchParams(searchParams.toString());
-    if (v === "grid") {
+    if (v === "lista") {
       params.delete("prikaz");
     } else {
       params.set("prikaz", v);
@@ -21,7 +21,7 @@ export default function ViewToggle() {
     <div className="flex items-center border border-[#2a2d35] overflow-hidden">
       <button
         onClick={() => setView("grid")}
-        className={`p-2 transition-colors cursor-pointer ${
+        className={`p-2.5 transition-colors cursor-pointer ${
           view === "grid" ? "bg-[#c8e64a]/10 text-[#c8e64a]" : "text-[#555963] hover:text-[#8b8f9a]"
         }`}
         title="Grid prikaz"
@@ -32,7 +32,7 @@ export default function ViewToggle() {
       </button>
       <button
         onClick={() => setView("lista")}
-        className={`p-2 transition-colors cursor-pointer ${
+        className={`p-2.5 transition-colors cursor-pointer ${
           view === "lista" ? "bg-[#c8e64a]/10 text-[#c8e64a]" : "text-[#555963] hover:text-[#8b8f9a]"
         }`}
         title="Lista prikaz"

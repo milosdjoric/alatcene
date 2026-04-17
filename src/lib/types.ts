@@ -28,7 +28,7 @@ export interface SearchParams {
   dostupnost?: string;
   cena_min?: number;
   cena_max?: number;
-  sort?: "cena_asc" | "cena_desc" | "popust_desc" | "naziv_asc" | "newest";
+  sort?: "cena_asc" | "cena_desc" | "usteda_desc" | "popust_desc" | "naziv_asc" | "newest";
   page?: number;
 }
 
@@ -43,4 +43,34 @@ export interface PricePoint {
   recorded_at: string;
   cena: number;
   redovna_cena: number | null;
+}
+
+export interface ProductOffer {
+  id: number;
+  izvor: string;
+  naziv: string;
+  cena: number;
+  redovna_cena: number | null;
+  popust_procenat: number | null;
+  url: string;
+  dostupnost: string;
+}
+
+export interface ProductGroup {
+  match_key: string;
+  brend_normalized: string | null;
+  extracted_model: string | null;
+  naziv: string;
+  min_cena: number;
+  max_cena: number;
+  num_sources: number;
+  historical_min_cena: number | null;
+  offers: ProductOffer[];
+}
+
+export interface GroupedSearchResponse {
+  groups: ProductGroup[];
+  total: number;
+  page: number;
+  totalPages: number;
 }

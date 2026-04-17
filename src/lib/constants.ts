@@ -28,6 +28,7 @@ export const PAGE_SIZE = 40;
 export const SORT_OPTIONS = [
   { value: "cena_asc", label: "Cena: najniža" },
   { value: "cena_desc", label: "Cena: najviša" },
+  { value: "usteda_desc", label: "Najveća ušteda" },
   { value: "popust_desc", label: "Najveći popust" },
   { value: "naziv_asc", label: "Naziv: A-Ž" },
   { value: "newest", label: "Najnovije" },
