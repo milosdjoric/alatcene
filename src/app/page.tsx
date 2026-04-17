@@ -289,6 +289,10 @@ export default async function Home({ searchParams }: PageProps) {
               <span className="text-[#8b8f9a]">cenealata.xyz</span>
               <span className="text-[#2a2d35]">/</span>
               <span className="text-[#555963]">17 prodavnica</span>
+              <span className="text-[#2a2d35]">/</span>
+              <Link href="/info" className="text-[#555963] hover:text-[#c8e64a] transition-colors">
+                info
+              </Link>
             </div>
             <p className="text-xs text-[#555963]">
               ažurirano svaki dan // 06:00
