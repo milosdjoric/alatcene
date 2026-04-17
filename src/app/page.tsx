@@ -147,7 +147,7 @@ export default async function Home({ searchParams }: PageProps) {
       {/* Header */}
       <header className="bg-[#16181d] border-b border-[#2a2d35] sticky top-0 z-40">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-14 gap-6">
+          <div className="flex items-center h-14 gap-3 sm:gap-6">
             <a href="/" className="flex items-center gap-0.5 flex-shrink-0">
               <span className="text-lg font-bold tracking-tight text-[#e0e2e7]">cene</span>
               <span className="text-lg font-bold tracking-tight text-[#c8e64a]">alata</span>
@@ -161,9 +161,9 @@ export default async function Home({ searchParams }: PageProps) {
               </div>
             )}
             <div className="hidden sm:flex items-center gap-3 text-xs text-[#8b8f9a] ml-auto">
-              <span>17 prodavnica</span>
+              <span>19 prodavnica</span>
               <span className="text-[#2a2d35]">/</span>
-              <span>34k+ alata</span>
+              <span>41k+ alata</span>
             </div>
           </div>
         </div>
@@ -179,7 +179,7 @@ export default async function Home({ searchParams }: PageProps) {
                 <span className="text-[#c8e64a]">najbolju cenu</span>
               </h1>
               <p className="text-[#8b8f9a] text-lg">
-                17 prodavnica. 34.000+ alata. Jedno mesto.
+                19 prodavnica. 34.000+ alata. Jedno mesto.
               </p>
             </div>
             <div className="max-w-xl mx-auto mb-12">
@@ -246,7 +246,7 @@ export default async function Home({ searchParams }: PageProps) {
               </Suspense>
 
               {/* Toolbar */}
-              <div className="flex items-center justify-between mb-5 gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3 sm:gap-4">
                 <div>
                   {q && (
                     <h1 className="text-base font-bold text-[#e0e2e7] mb-0.5">
@@ -288,7 +288,7 @@ export default async function Home({ searchParams }: PageProps) {
             <div className="flex items-center gap-2 text-sm">
               <span className="text-[#8b8f9a]">cenealata.xyz</span>
               <span className="text-[#2a2d35]">/</span>
-              <span className="text-[#555963]">17 prodavnica</span>
+              <span className="text-[#555963]">19 prodavnica</span>
               <span className="text-[#2a2d35]">/</span>
               <Link href="/info" className="text-[#555963] hover:text-[#c8e64a] transition-colors">
                 info

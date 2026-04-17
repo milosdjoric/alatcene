@@ -20,6 +20,8 @@
     "scrape:axisshop": "node scrapers/axisshop.js",
     "scrape:kliklak": "node scrapers/kliklak.js",
     "scrape:odl": "node scrapers/odigledolokomotive.js",
+    "scrape:ananas": "node scrapers/ananas.js",
+    "scrape:crafter": "node scrapers/crafter.js",
     "scrape:all": "node scrape-all.js",
     "serve": "npx serve . -l 3456",
     "dev": "next dev",

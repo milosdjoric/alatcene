@@ -19,6 +19,8 @@ export const SOURCES: Record<
   amcarco: { label: "Amcarco", color: "#84cc16", url: "amcarco.co.rs" },
   axisshop: { label: "Axis Shop", color: "#06b6d4", url: "axisshop.rs" },
   bosshop: { label: "Boss Shop", color: "#eab308", url: "bosshop.rs" },
+  ananas: { label: "Ananas", color: "#ff6b00", url: "ananas.rs" },
+  crafter: { label: "Crafter", color: "#e53935", url: "crafter.rs" },
 };
 
 export const PAGE_SIZE = 40;
