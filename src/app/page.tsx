@@ -53,6 +53,17 @@ async function fetchCategories() {
   return (data ?? []) as { name: string; count: number }[];
 }
 
+async function fetchLastUpdated(): Promise<string | null> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("products")
+    .select("updated_at")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .single();
+  return data?.updated_at ?? null;
+}
+
 async function fetchTopDeals() {
   const supabase = createServerClient();
 
@@ -76,11 +87,12 @@ export default async function Home({ searchParams }: PageProps) {
   const params = await searchParams;
   const isLanding = !hasActiveFilters(params);
 
-  const [result, brands, categories, topDeals] = await Promise.all([
+  const [result, brands, categories, topDeals, lastUpdated] = await Promise.all([
     fetchGroupedProducts(params),
     fetchBrands(),
     fetchCategories(),
     isLanding ? fetchTopDeals() : Promise.resolve([]),
+    fetchLastUpdated(),
   ]);
 
   const page = parseInt(params.page || "1");
@@ -94,9 +106,7 @@ export default async function Home({ searchParams }: PageProps) {
         <header className="max-w-[1400px] mx-auto bg-[#16181d]/80 backdrop-blur-xl border border-[#2a2d35]/60 rounded-lg shadow-lg shadow-black/20">
           <div className="flex items-center h-12 px-4 gap-4">
             <a href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-[#e0e2e7]">cene</span>
-              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">alata</span>
-              <span className="text-[10px] text-[#555963] font-normal ml-0.5">.xyz</span>
+              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">cene</span><span className="text-lg font-light tracking-tight text-[#e0e2e7]">alata</span>
             </a>
 
             {!isLanding && (
@@ -246,7 +256,9 @@ export default async function Home({ searchParams }: PageProps) {
               </Link>
             </div>
             <p className="text-xs text-[#555963]">
-              ažurirano svaki dan // 06:00
+              cene ažurirane {lastUpdated
+                ? new Date(lastUpdated).toLocaleDateString("sr-RS", { day: "numeric", month: "long", year: "numeric" })
+                : "—"}
             </p>
           </div>
         </div>

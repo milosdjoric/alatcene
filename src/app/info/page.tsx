@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { createServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "O sajtu — cenealata.xyz",
@@ -27,7 +28,16 @@ const sources = [
   "Amcarco",
 ];
 
-export default function InfoPage() {
+export default async function InfoPage() {
+  const supabase = createServerClient();
+  const { data: lastRow } = await supabase
+    .from("products")
+    .select("updated_at")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .single();
+  const lastUpdated = lastRow?.updated_at ?? null;
+
   return (
     <>
       {/* Header */}
@@ -106,7 +116,7 @@ export default function InfoPage() {
             <p className="text-[#8b8f9a] text-sm leading-relaxed mb-4">
               Trenutno pratimo cene iz sledećih prodavnica:
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {sources.map((source) => (
                 <div
                   key={source}
@@ -238,7 +248,9 @@ export default function InfoPage() {
               <span className="text-[#555963]">17 prodavnica</span>
             </div>
             <p className="text-xs text-[#555963]">
-              ažurirano svaki dan // 06:00
+              cene ažurirane {lastUpdated
+                ? new Date(lastUpdated).toLocaleDateString("sr-RS", { day: "numeric", month: "long", year: "numeric" })
+                : "—"}
             </p>
           </div>
         </div>

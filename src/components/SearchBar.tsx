@@ -58,7 +58,7 @@ export default function SearchBar() {
         defaultValue={q}
         onChange={(e) => handleInput(e.target.value)}
         placeholder="Pretraži alate..."
-        className="w-full pl-10 pr-10 py-2.5 rounded-none border border-[#2a2d35] bg-[#0c0d10] text-[#e0e2e7] text-sm placeholder:text-[#555963] focus:outline-none focus:border-[#c8e64a] transition-colors"
+        className="w-full pl-10 pr-10 py-3 rounded-none border border-[#2a2d35] bg-[#0c0d10] text-[#e0e2e7] text-sm placeholder:text-[#555963] focus:outline-none focus:border-[#c8e64a] transition-colors"
       />
       {q && (
         <button

@@ -46,6 +46,8 @@ export default function ActiveFilters() {
     const params = new URLSearchParams();
     const q = searchParams.get("q");
     if (q) params.set("q", q);
+    const sort = searchParams.get("sort");
+    params.set("sort", sort || "cena_asc");
     router.push(`/?${params.toString()}`);
   }
 

@@ -74,9 +74,7 @@ export default async function ProductComparePage({ params }: PageProps) {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-14 gap-3">
             <Link href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-[#e0e2e7]">cene</span>
-              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">alata</span>
-              <span className="text-xs text-[#555963] font-normal ml-0.5">.xyz</span>
+              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">cene</span><span className="text-lg font-light tracking-tight text-[#e0e2e7]">alata</span>
             </Link>
             <span className="text-[#2a2d35] mx-2">/</span>
             <span className="text-sm text-[#8b8f9a] truncate">{best.naziv}</span>
@@ -203,7 +201,17 @@ export default async function ProductComparePage({ params }: PageProps) {
       <footer className="border-t border-[#2a2d35] mt-auto">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-[#8b8f9a]">cenealata.xyz</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[#8b8f9a]">cenealata.xyz</span>
+              <span className="text-[#2a2d35]">/</span>
+              <span className="text-xs text-[#555963]">
+                cene ažurirane {products.length > 0
+                  ? new Date(
+                      products.reduce((latest, p) => p.updated_at > latest ? p.updated_at : latest, products[0].updated_at)
+                    ).toLocaleDateString("sr-RS", { day: "numeric", month: "long", year: "numeric" })
+                  : "—"}
+              </span>
+            </div>
             <Link href="/info" className="text-[#555963] hover:text-[#c8e64a] transition-colors">
               info
             </Link>
