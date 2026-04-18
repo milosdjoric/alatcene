@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server";
+import { matchKeySchema, validateParams } from "@/lib/validations";
 
 export async function GET(
   _request: Request,
@@ -7,13 +8,16 @@ export async function GET(
   const { matchKey } = await params;
   const decodedKey = decodeURIComponent(matchKey);
 
+  const parsed = validateParams(matchKeySchema, decodedKey);
+  if (!parsed.success) return parsed.error;
+
   const supabase = createServerClient();
 
   // Nađi sve product_id-jeve za ovaj match_key
   const { data: products } = await supabase
     .from("products")
     .select("id, izvor")
-    .eq("match_key", decodedKey);
+    .eq("match_key", parsed.data);
 
   if (!products || products.length === 0) {
     return Response.json([]);

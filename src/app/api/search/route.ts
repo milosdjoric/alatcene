@@ -1,23 +1,21 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { PAGE_SIZE } from "@/lib/constants";
+import { searchParamsSchema, validateParams } from "@/lib/validations";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q")?.trim();
-  const brend = searchParams.get("brend");
-  const izvor = searchParams.get("izvor");
-  const dostupnost = searchParams.get("dostupnost");
-  const cenaMin = searchParams.get("cena_min");
-  const cenaMax = searchParams.get("cena_max");
-  const sort = searchParams.get("sort") || "cena_asc";
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+
+  const raw = Object.fromEntries(searchParams.entries());
+  const parsed = validateParams(searchParamsSchema, raw);
+  if (!parsed.success) return parsed.error;
+
+  const { q, brend, izvor, dostupnost, cena_min, cena_max, sort, page } =
+    parsed.data;
   const limit = PAGE_SIZE;
 
   const supabase = createServerClient();
 
-  let query = supabase
-    .from("products")
-    .select("*", { count: "exact" });
+  let query = supabase.from("products").select("*", { count: "exact" });
 
   if (q) {
     query = query.ilike("naziv", `%${q}%`);
@@ -31,11 +29,11 @@ export async function GET(request: Request) {
   if (dostupnost) {
     query = query.eq("dostupnost", dostupnost);
   }
-  if (cenaMin) {
-    query = query.gte("cena", parseInt(cenaMin));
+  if (cena_min !== undefined) {
+    query = query.gte("cena", cena_min);
   }
-  if (cenaMax) {
-    query = query.lte("cena", parseInt(cenaMax));
+  if (cena_max !== undefined) {
+    query = query.lte("cena", cena_max);
   }
 
   switch (sort) {
@@ -43,13 +41,19 @@ export async function GET(request: Request) {
       query = query.order("cena", { ascending: false });
       break;
     case "popust_desc":
-      query = query.order("popust_procenat", { ascending: false, nullsFirst: false });
+      query = query.order("popust_procenat", {
+        ascending: false,
+        nullsFirst: false,
+      });
       break;
     case "naziv_asc":
       query = query.order("naziv", { ascending: true });
       break;
     case "newest":
       query = query.order("updated_at", { ascending: false });
+      break;
+    case "usteda_desc":
+      query = query.order("usteda", { ascending: false, nullsFirst: false });
       break;
     case "cena_asc":
     default:

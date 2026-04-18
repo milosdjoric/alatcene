@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
@@ -9,9 +9,38 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "cenealata.xyz — Uporedi cene alata iz 17 prodavnica",
+  title: {
+    default: "cenealata.xyz — Uporedi cene alata iz 17 prodavnica",
+    template: "%s | cenealata.xyz",
+  },
   description:
     "Pretraži i uporedi cene električnih i akumulatorskih alata iz 17 srpskih online prodavnica. Bosch, Makita, DeWalt, Milwaukee i 150+ brendova.",
+  metadataBase: new URL("https://cenealata.xyz"),
+  openGraph: {
+    title: "cenealata.xyz — Uporedi cene alata iz 17 prodavnica",
+    description:
+      "17 prodavnica. 34.000+ alata. Jedno mesto za upoređivanje cena.",
+    url: "https://cenealata.xyz",
+    siteName: "cenealata.xyz",
+    locale: "sr_RS",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "cenealata.xyz — Uporedi cene alata",
+    description:
+      "17 prodavnica. 34.000+ alata. Jedno mesto za upoređivanje cena.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0c0d10",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
