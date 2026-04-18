@@ -10,24 +10,24 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "cenealata.xyz — Uporedi cene alata iz 17 prodavnica",
-    template: "%s | cenealata.xyz",
+    default: "cenealata.in.rs — Uporedi cene alata iz 17 prodavnica",
+    template: "%s | cenealata.in.rs",
   },
   description:
     "Pretraži i uporedi cene električnih i akumulatorskih alata iz 17 srpskih online prodavnica. Bosch, Makita, DeWalt, Milwaukee i 150+ brendova.",
-  metadataBase: new URL("https://cenealata.xyz"),
+  metadataBase: new URL("https://cenealata.in.rs"),
   openGraph: {
-    title: "cenealata.xyz — Uporedi cene alata iz 17 prodavnica",
+    title: "cenealata.in.rs — Uporedi cene alata iz 17 prodavnica",
     description:
       "17 prodavnica. 34.000+ alata. Jedno mesto za upoređivanje cena.",
-    url: "https://cenealata.xyz",
-    siteName: "cenealata.xyz",
+    url: "https://cenealata.in.rs",
+    siteName: "cenealata.in.rs",
     locale: "sr_RS",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "cenealata.xyz — Uporedi cene alata",
+    title: "cenealata.in.rs — Uporedi cene alata",
     description:
       "17 prodavnica. 34.000+ alata. Jedno mesto za upoređivanje cena.",
   },

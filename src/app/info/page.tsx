@@ -3,9 +3,9 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "O sajtu — cenealata.xyz",
+  title: "O sajtu — cenealata.in.rs",
   description:
-    "Informacije o sajtu cenealata.xyz — kako funkcioniše, izvori podataka, uslovi korišćenja i politika privatnosti.",
+    "Informacije o sajtu cenealata.in.rs — kako funkcioniše, izvori podataka, uslovi korišćenja i politika privatnosti.",
 };
 
 const sources = [
@@ -47,7 +47,7 @@ export default async function InfoPage() {
             <Link href="/" className="flex items-center gap-0.5 flex-shrink-0">
               <span className="text-lg font-bold tracking-tight text-[#e0e2e7]">cene</span>
               <span className="text-lg font-bold tracking-tight text-[#c8e64a]">alata</span>
-              <span className="text-xs text-[#555963] font-normal ml-0.5">.xyz</span>
+              <span className="text-xs text-[#555963] font-normal ml-0.5">.in.rs</span>
             </Link>
             <div className="hidden sm:flex items-center gap-3 text-xs text-[#8b8f9a] ml-auto">
               <span>17 prodavnica</span>
@@ -70,14 +70,14 @@ export default async function InfoPage() {
             Poslednje ažuriranje: april 2026.
           </p>
 
-          {/* Šta je cenealata.xyz */}
+          {/* Šta je cenealata.in.rs */}
           <section className="mb-12">
             <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider mb-4">
-              Šta je cenealata.xyz
+              Šta je cenealata.in.rs
             </h2>
             <div className="space-y-3 text-[#8b8f9a] text-sm leading-relaxed">
               <p>
-                cenealata.xyz je besplatan agregator cena alata i opreme iz srpskih
+                cenealata.in.rs je besplatan agregator cena alata i opreme iz srpskih
                 online prodavnica. Sajt ne prodaje proizvode — samo prikazuje javno
                 dostupne cene i linkuje na originalne prodavnice gde se kupovina
                 obavlja.
@@ -147,7 +147,7 @@ export default async function InfoPage() {
                 </li>
                 <li className="flex gap-2">
                   <span className="text-[#c8e64a] flex-shrink-0">—</span>
-                  cenealata.xyz nije odgovoran za tačnost podataka, dostupnost
+                  cenealata.in.rs nije odgovoran za tačnost podataka, dostupnost
                   proizvoda, niti za transakcije obavljene u prodavnicama.
                 </li>
                 <li className="flex gap-2">
@@ -166,7 +166,7 @@ export default async function InfoPage() {
             </h2>
             <div className="space-y-3 text-[#8b8f9a] text-sm leading-relaxed">
               <p>
-                Korišćenjem sajta cenealata.xyz prihvatate sledeće uslove:
+                Korišćenjem sajta cenealata.in.rs prihvatate sledeće uslove:
               </p>
               <ul className="space-y-2 ml-4">
                 <li className="flex gap-2">
@@ -205,7 +205,7 @@ export default async function InfoPage() {
             </h2>
             <div className="space-y-3 text-[#8b8f9a] text-sm leading-relaxed">
               <p>
-                cenealata.xyz ne prikuplja lične podatke korisnika. Ne koristimo
+                cenealata.in.rs ne prikuplja lične podatke korisnika. Ne koristimo
                 kolačiće za praćenje, ne zahtevamo registraciju i ne čuvamo
                 podatke o vašim pretragama.
               </p>
@@ -243,7 +243,7 @@ export default async function InfoPage() {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-[#8b8f9a]">cenealata.xyz</span>
+              <span className="text-[#8b8f9a]">cenealata.in.rs</span>
               <span className="text-[#2a2d35]">/</span>
               <span className="text-[#555963]">17 prodavnica</span>
             </div>

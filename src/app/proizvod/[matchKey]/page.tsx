@@ -47,7 +47,7 @@ export default async function ProductComparePage({ params }: PageProps) {
               <Link href="/" className="flex items-center gap-0.5">
                 <span className="text-lg font-bold tracking-tight text-[#e0e2e7]">cene</span>
                 <span className="text-lg font-bold tracking-tight text-[#c8e64a]">alata</span>
-                <span className="text-xs text-[#555963] font-normal ml-0.5">.xyz</span>
+                <span className="text-xs text-[#555963] font-normal ml-0.5">.in.rs</span>
               </Link>
             </div>
           </div>
@@ -202,7 +202,7 @@ export default async function ProductComparePage({ params }: PageProps) {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-[#8b8f9a]">cenealata.xyz</span>
+              <span className="text-[#8b8f9a]">cenealata.in.rs</span>
               <span className="text-[#2a2d35]">/</span>
               <span className="text-xs text-[#555963]">
                 cene ažurirane {products.length > 0

@@ -106,7 +106,7 @@ export default async function Home({ searchParams }: PageProps) {
         <header className="max-w-[1400px] mx-auto bg-[#16181d]/80 backdrop-blur-xl border border-[#2a2d35]/60 rounded-lg shadow-lg shadow-black/20">
           <div className="flex items-center h-12 px-4 gap-4">
             <a href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">cene</span><span className="text-lg font-light tracking-tight text-[#e0e2e7]">alata</span>
+              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">cene</span><span className="text-lg font-light tracking-tight text-[#e0e2e7]">alata</span><span className="text-xs text-[#555963] font-normal ml-0.5">.in.rs</span>
             </a>
 
             {!isLanding && (
@@ -247,7 +247,7 @@ export default async function Home({ searchParams }: PageProps) {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-[#8b8f9a]">cenealata.xyz</span>
+              <span className="text-[#8b8f9a]">cenealata.in.rs</span>
               <span className="text-[#2a2d35]">/</span>
               <span className="text-[#555963]">19 prodavnica</span>
               <span className="text-[#2a2d35]">/</span>

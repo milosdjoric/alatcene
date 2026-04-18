@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const uniqueKeys = [...new Set((data ?? []).map((r) => r.match_key))];
 
   const productUrls: MetadataRoute.Sitemap = uniqueKeys.map((key) => ({
-    url: `https://cenealata.xyz/proizvod/${encodeURIComponent(key)}`,
+    url: `https://cenealata.in.rs/proizvod/${encodeURIComponent(key)}`,
     lastModified: new Date(),
     changeFrequency: "daily",
     priority: 0.7,
@@ -20,13 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     {
-      url: "https://cenealata.xyz",
+      url: "https://cenealata.in.rs",
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
-      url: "https://cenealata.xyz/info",
+      url: "https://cenealata.in.rs/info",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.3,

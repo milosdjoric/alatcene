@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/"],
       },
     ],
-    sitemap: "https://cenealata.xyz/sitemap.xml",
+    sitemap: "https://cenealata.in.rs/sitemap.xml",
   };
 }
