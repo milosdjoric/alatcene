@@ -14,6 +14,7 @@ export interface Product {
   url: string;
   izvor: string;
   dostupnost: "NA_STANJU" | "RASPRODATO";
+  cena_sumnjiva: boolean;
   ocena: number | null;
   broj_recenzija: number | null;
   specifikacije: string[] | null;
@@ -54,6 +55,7 @@ export interface ProductOffer {
   popust_procenat: number | null;
   url: string;
   dostupnost: string;
+  cena_sumnjiva: boolean;
 }
 
 export interface ProductGroup {

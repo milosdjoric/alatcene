@@ -36,10 +36,13 @@ export default function ProductGroupCard({ group }: { group: ProductGroup }) {
         )}
 
         <div className="mt-auto pt-3 border-t border-[#2a2d35]">
-          <span className="text-xl font-bold text-[#e0e2e7] tracking-tight">
+          <span className={`text-xl font-bold tracking-tight ${bestOffer.cena_sumnjiva ? "text-[#f59e0b]" : "text-[#e0e2e7]"}`}>
             {formatPrice(group.min_cena)}
             <span className="text-xs font-normal text-[#555963] ml-1">RSD</span>
           </span>
+          {bestOffer.cena_sumnjiva && (
+            <div className="text-[10px] text-[#f59e0b] mt-0.5" title="Cena izgleda kao greška">moguća greška?</div>
+          )}
         </div>
 
         <div className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-[#c8e64a] opacity-0 group-hover:opacity-100 transition-opacity bg-[#c8e64a]/10 py-1.5">
@@ -75,16 +78,19 @@ export default function ProductGroupCard({ group }: { group: ProductGroup }) {
       {/* Cene */}
       <div className="mt-auto pt-3 border-t border-[#2a2d35]">
         <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-xl font-bold text-[#c8e64a] tracking-tight">
+          <span className={`text-xl font-bold tracking-tight ${bestOffer?.cena_sumnjiva ? "text-[#f59e0b]" : "text-[#c8e64a]"}`}>
             {formatPrice(group.min_cena)}
             <span className="text-xs font-normal text-[#555963] ml-1">RSD</span>
           </span>
-          {hasMultiplePrices && (
+          {hasMultiplePrices && !bestOffer?.cena_sumnjiva && (
             <span className="text-xs text-[#555963]">
               — {formatPrice(group.max_cena)} RSD
             </span>
           )}
         </div>
+        {bestOffer?.cena_sumnjiva && (
+          <div className="text-[10px] text-[#f59e0b] mt-0.5" title="Cena izgleda kao greška">moguća greška?</div>
+        )}
       </div>
 
       {/* Istorijski minimum */}
@@ -99,8 +105,9 @@ export default function ProductGroupCard({ group }: { group: ProductGroup }) {
         {group.offers.slice(0, 3).map((offer) => (
           <div key={offer.id} className="flex items-center justify-between">
             <SourceBadge izvor={offer.izvor} />
-            <span className="text-xs font-medium text-[#8b8f9a]">
+            <span className={`text-xs font-medium ${offer.cena_sumnjiva ? "text-[#f59e0b]" : "text-[#8b8f9a]"}`}>
               {formatPrice(offer.cena)} RSD
+              {offer.cena_sumnjiva && <span className="ml-1" title="Moguća greška">⚠</span>}
             </span>
           </div>
         ))}

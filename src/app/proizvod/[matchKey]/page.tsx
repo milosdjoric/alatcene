@@ -22,6 +22,8 @@ export default async function ProductComparePage({ params }: PageProps) {
     .from("products")
     .select("*")
     .eq("match_key", decodedKey)
+    .order("dostupnost", { ascending: true })
+    .order("cena_sumnjiva", { ascending: true })
     .order("cena", { ascending: true });
 
   const products = (data ?? []) as Product[];
@@ -63,9 +65,11 @@ export default async function ProductComparePage({ params }: PageProps) {
   }
 
   const best = products[0];
-  const worst = products[products.length - 1];
   const brand = best.brend_normalized;
-  const savings = products.length > 1 ? worst.cena - best.cena : 0;
+  const trusted = products.filter((p) => !p.cena_sumnjiva);
+  const bestTrusted = trusted[0] ?? best;
+  const worstTrusted = trusted[trusted.length - 1] ?? products[products.length - 1];
+  const savings = trusted.length > 1 ? worstTrusted.cena - bestTrusted.cena : 0;
 
   return (
     <>
@@ -107,11 +111,11 @@ export default async function ProductComparePage({ params }: PageProps) {
           <div className={`grid gap-3 mb-8 ${historicalMin != null ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
             <div className="bg-[#16181d] border border-[#2a2d35] p-4">
               <p className="text-[10px] uppercase tracking-wider text-[#555963] mb-1">Najniža cena</p>
-              <p className="text-xl font-bold text-[#c8e64a]">{formatPrice(best.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
+              <p className="text-xl font-bold text-[#c8e64a]">{formatPrice(bestTrusted.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
             </div>
             <div className="bg-[#16181d] border border-[#2a2d35] p-4">
               <p className="text-[10px] uppercase tracking-wider text-[#555963] mb-1">Najviša cena</p>
-              <p className="text-xl font-bold text-[#e0e2e7]">{formatPrice(worst.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
+              <p className="text-xl font-bold text-[#e0e2e7]">{formatPrice(worstTrusted.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
             </div>
             <div className="bg-[#16181d] border border-[#2a2d35] p-4">
               <p className="text-[10px] uppercase tracking-wider text-[#555963] mb-1">Ušteda</p>
@@ -140,8 +144,9 @@ export default async function ProductComparePage({ params }: PageProps) {
           <div className="divide-y divide-[#2a2d35]">
             {products.map((product, i) => {
               const sourceInfo = SOURCES[product.izvor];
-              const isFirst = i === 0;
+              const isFirst = i === 0 && !product.cena_sumnjiva;
               const outOfStock = product.dostupnost === "RASPRODATO";
+              const suspicious = product.cena_sumnjiva;
 
               return (
                 <a
@@ -164,6 +169,16 @@ export default async function ProductComparePage({ params }: PageProps) {
                     )}
                   </div>
 
+                  {/* Sumnjiva cena */}
+                  {suspicious && (
+                    <span
+                      className="text-[10px] uppercase tracking-wider text-[#f59e0b] border border-[#f59e0b]/40 px-1.5 py-0.5 flex-shrink-0"
+                      title="Cena izgleda kao greška — znatno odstupa od ostalih ponuda u grupi"
+                    >
+                      moguća greška?
+                    </span>
+                  )}
+
                   {/* Popust */}
                   {product.popust_procenat && product.popust_procenat >= 5 && (
                     <span className="text-[11px] font-bold text-[#c8e64a] flex-shrink-0">
@@ -179,7 +194,7 @@ export default async function ProductComparePage({ params }: PageProps) {
                   )}
 
                   {/* Cena */}
-                  <span className={`text-base font-bold flex-shrink-0 ${isFirst ? "text-[#c8e64a]" : "text-[#e0e2e7]"}`}>
+                  <span className={`text-base font-bold flex-shrink-0 ${isFirst ? "text-[#c8e64a]" : suspicious ? "text-[#f59e0b]" : "text-[#e0e2e7]"}`}>
                     {formatPrice(product.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span>
                   </span>
 

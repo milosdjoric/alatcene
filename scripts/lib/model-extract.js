@@ -24,6 +24,27 @@ const NUMERIC_CATALOG = /\b(\d{5,8})\b/;
 // Pattern za kodove u zagradama (kliklak stil)
 const PAREN_CODE = /\(\s*([A-Z0-9][\w\-/. ]{2,}?)\s*\)/i;
 
+// Pribor/rezervni delovi — reči koje signalizuju da je proizvod pribor za drugi alat
+// (npr. "nož za HC 260", "filter vreća za DC500"). Ako se pojavljuju sa "za"
+// u istom nazivu, model kod u nazivu verovatno pripada glavnom alatu, ne priboru.
+// Koristi Unicode-safe boundary (\b u JS ne radi sa ž/č/š/đ).
+const ACCESSORY_WORDS = /(?<![\p{L}])(nož(?:a|em|evi?|eva)?|disk(?:ovi)?|ploč[aei]|vreć[aei]|filter(?:a|i)?|papir(?:a|i)?|punjač(?:a|i)?|nastav(?:a)?k(?:a|u|om)?|pribor(?:a)?|kotur(?:a)?|kalup(?:a|i)?|dodat(?:a)?k(?:a|u)?|list(?:a|i|ovi)?|olovk[aei]|mlaznic[aei]|kutij[aei]|kom(?:p)?let(?:a)?|žic[aei]|set)(?![\p{L}])/iu;
+const FOR_PREPOSITION = /(?<![\p{L}])za(?![\p{L}])/iu;
+
+/**
+ * Detektuje da li je naziv proizvoda pribor/rezervni deo
+ * (ima accessory reč + "za" u nazivu)
+ */
+function isAccessory(naziv) {
+  if (!naziv) return false;
+  return ACCESSORY_WORDS.test(naziv) && FOR_PREPOSITION.test(naziv);
+}
+
+// Strip "+ poklon ..." tail — kod posle njega pripada poklonu, ne glavnom proizvodu
+function stripPoklonTail(name) {
+  return name.split(/\s*\+\s*poklon\b/i)[0].trim();
+}
+
 /**
  * Normalizuje SKU — stripuje prefix, whitespace, uppercase
  * Vraća null ako je EAN/barcode ili prazan
@@ -57,7 +78,12 @@ function normalizeSku(sku) {
 function extractModelFromName(naziv) {
   if (!naziv) return null;
 
-  let name = naziv.trim();
+  // Pribor filter — ako naziv sadrži accessory reč + "za", model u nazivu
+  // referiše glavni alat; ne matchuj kroz naziv (proizvod ostaje solo)
+  if (isAccessory(naziv)) return null;
+
+  // Strip "+ poklon" tail da ne pokupimo model iz poklona
+  let name = stripPoklonTail(naziv).trim();
 
   // 1. Kod u zagradama (kliklak stil): "( GX-EID040-2 )"
   const parenMatch = name.match(PAREN_CODE);
@@ -158,4 +184,4 @@ function extractMatch(naziv, sku, brendNormalized) {
   return { model: null, matchKey: null };
 }
 
-module.exports = { extractMatch, normalizeSku, extractModelFromName };
+module.exports = { extractMatch, normalizeSku, extractModelFromName, isAccessory };

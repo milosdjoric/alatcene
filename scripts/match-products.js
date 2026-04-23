@@ -8,6 +8,75 @@ const { extractMatch } = require("./lib/model-extract");
 const FETCH_SIZE = 1000;
 const UPDATE_SIZE = 500;
 
+// Prag za detekciju sumnjivih cena (outlier u grupi)
+// Konzervativan prag — bolje propustiti neke nego lažno flagovati set-ove/kompletne pakete
+const OUTLIER_MIN_GROUP = 3; // min ponuda u grupi za flagovanje
+const OUTLIER_HIGH_MULT = 5.0; // > 5× medijane
+const OUTLIER_LOW_MULT = 0.2; // < 0.2× (1/5) medijane
+
+function median(sortedArr) {
+  const n = sortedArr.length;
+  if (n === 0) return 0;
+  const mid = Math.floor(n / 2);
+  return n % 2 === 0 ? (sortedArr[mid - 1] + sortedArr[mid]) / 2 : sortedArr[mid];
+}
+
+// Detektuje "set/komplet/paket" nazive — grupe sa mešanim konfiguracijama
+// ne treba flagovati (jeftina solo verzija vs. skupi set su legitimni)
+const SET_KEYWORDS = /(?<![\p{L}])(set|komplet|paket|promo\s*pak)(?![\p{L}])/iu;
+function hasSetKeyword(naziv) {
+  if (!naziv) return false;
+  return SET_KEYWORDS.test(naziv) || naziv.includes(" + ");
+}
+
+function detectOutliers(updates) {
+  const groups = {};
+  for (const u of updates) {
+    if (!u.match_key || !u.cena || u.cena <= 0) continue;
+    if (!groups[u.match_key]) groups[u.match_key] = [];
+    groups[u.match_key].push(u);
+  }
+
+  const flagged = new Set();
+  for (const [, items] of Object.entries(groups)) {
+    if (items.length < OUTLIER_MIN_GROUP) continue;
+    // Skip heterogene grupe (mix solo/set/komplet) — varijacija je legitimna
+    if (items.some((i) => hasSetKeyword(i.naziv))) continue;
+    const sorted = items.map((i) => i.cena).sort((a, b) => a - b);
+    const med = median(sorted);
+    if (med <= 0) continue;
+    const highLimit = med * OUTLIER_HIGH_MULT;
+    const lowLimit = med * OUTLIER_LOW_MULT;
+    for (const item of items) {
+      if (item.cena > highLimit || item.cena < lowLimit) {
+        flagged.add(item.id);
+      }
+    }
+  }
+  return flagged;
+}
+
+async function batchUpdateFlags(updates, flagged) {
+  let updated = 0;
+  let errors = 0;
+
+  for (let i = 0; i < updates.length; i += UPDATE_SIZE) {
+    const batch = updates.slice(i, i + UPDATE_SIZE);
+    const ids = batch.map((u) => u.id);
+    const flags = batch.map((u) => flagged.has(u.id));
+
+    const { error } = await supabase.rpc("bulk_update_cena_sumnjiva", { ids, flags });
+    if (error) {
+      console.error(`   ⚠️ Flags batch ${i}: ${error.message}`);
+      errors += batch.length;
+    } else {
+      updated += batch.length;
+    }
+  }
+
+  return { updated, errors };
+}
+
 async function fetchAllProducts() {
   const products = [];
   let offset = 0;
@@ -15,7 +84,7 @@ async function fetchAllProducts() {
   while (true) {
     const { data, error } = await supabase
       .from("products")
-      .select("id, sku, naziv, brend_normalized")
+      .select("id, sku, naziv, brend_normalized, cena")
       .range(offset, offset + FETCH_SIZE - 1);
 
     if (error) {
@@ -94,6 +163,8 @@ async function main() {
       id: p.id,
       match_key: matchKey,
       extracted_model: model,
+      cena: p.cena,
+      naziv: p.naziv,
     });
 
     if (matchKey) {
@@ -126,6 +197,15 @@ async function main() {
   const { updated, errors } = await batchUpdate(updates);
   console.log(`   ✅ Ažurirano: ${updated}`);
   if (errors > 0) console.log(`   ❌ Grešaka: ${errors}`);
+  console.log();
+
+  // 3.5 Detekcija sumnjivih cena (outlier u grupi)
+  console.log("🚨 Detekcija sumnjivih cena...");
+  const flagged = detectOutliers(updates);
+  console.log(`   Flagovano: ${flagged.size} proizvoda (prag: grupa ≥${OUTLIER_MIN_GROUP}, cena >${OUTLIER_HIGH_MULT}× ili <${OUTLIER_LOW_MULT.toFixed(2)}× medijane)`);
+  const flagRes = await batchUpdateFlags(updates, flagged);
+  console.log(`   ✅ Ažurirano: ${flagRes.updated}`);
+  if (flagRes.errors > 0) console.log(`   ❌ Grešaka: ${flagRes.errors}`);
   console.log();
 
   // 4. Top grupe

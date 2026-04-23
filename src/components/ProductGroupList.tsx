@@ -64,7 +64,10 @@ export default function ProductGroupList({ groups }: { groups: ProductGroup[] })
                 {group.offers.slice(0, 3).map((offer) => (
                   <div key={offer.id} className="flex items-center gap-1.5">
                     <SourceBadge izvor={offer.izvor} />
-                    <span className="text-xs text-[#8b8f9a]">{formatPrice(offer.cena)}</span>
+                    <span className={`text-xs ${offer.cena_sumnjiva ? "text-[#f59e0b]" : "text-[#8b8f9a]"}`}>
+                      {formatPrice(offer.cena)}
+                      {offer.cena_sumnjiva && <span className="ml-1" title="Cena odstupa od ostalih — moguća greška">⚠</span>}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -72,11 +75,16 @@ export default function ProductGroupList({ groups }: { groups: ProductGroup[] })
 
             {/* Cena */}
             <div className="flex-shrink-0 text-right">
-              <span className={`text-lg font-bold tracking-tight ${isSolo ? "text-[#e0e2e7]" : "text-[#c8e64a]"}`}>
+              <span className={`text-lg font-bold tracking-tight ${bestOffer?.cena_sumnjiva ? "text-[#f59e0b]" : isSolo ? "text-[#e0e2e7]" : "text-[#c8e64a]"}`}>
                 {formatPrice(group.min_cena)}
                 <span className="text-xs font-normal text-[#555963] ml-1">RSD</span>
               </span>
-              {hasMultiplePrices && (
+              {bestOffer?.cena_sumnjiva && (
+                <div className="text-[10px] text-[#f59e0b]" title="Cena odstupa od ostalih ponuda">
+                  moguća greška?
+                </div>
+              )}
+              {hasMultiplePrices && !bestOffer?.cena_sumnjiva && (
                 <div className="text-[10px] text-[#555963]">
                   — {formatPrice(group.max_cena)} RSD
                 </div>
