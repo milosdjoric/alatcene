@@ -181,34 +181,37 @@ export default async function ProductComparePage({ params }: PageProps) {
                     )}
                   </div>
 
-                  {/* Sumnjiva cena */}
-                  {suspicious && (
+                  {suspicious ? (
+                    /* Sentinel/sumnjiva cena — lažan broj se ne prikazuje;
+                       uputi korisnika da proveri pravu cenu kod prodavnice */
                     <span
-                      className="text-[10px] uppercase tracking-wider text-[#f59e0b] border border-[#f59e0b]/40 px-1.5 py-0.5 flex-shrink-0"
-                      title="Cena izgleda kao greška — znatno odstupa od ostalih ponuda u grupi"
+                      className="text-sm font-medium text-[#8b8f9a] flex-shrink-0"
+                      title="Cena na ovom sajtu izgleda kao greška ili placeholder — proveri direktno kod prodavnice"
                     >
-                      moguća greška?
+                      Proveri cenu
                     </span>
-                  )}
+                  ) : (
+                    <>
+                      {/* Popust */}
+                      {product.popust_procenat && product.popust_procenat >= 5 && (
+                        <span className="text-[11px] font-bold text-[#c8e64a] flex-shrink-0">
+                          -{product.popust_procenat}%
+                        </span>
+                      )}
 
-                  {/* Popust */}
-                  {product.popust_procenat && product.popust_procenat >= 5 && (
-                    <span className="text-[11px] font-bold text-[#c8e64a] flex-shrink-0">
-                      -{product.popust_procenat}%
-                    </span>
-                  )}
+                      {/* Stara cena */}
+                      {product.redovna_cena && product.redovna_cena > product.cena && (
+                        <span className="text-xs text-[#555963] line-through flex-shrink-0">
+                          {formatPrice(product.redovna_cena)}
+                        </span>
+                      )}
 
-                  {/* Stara cena */}
-                  {product.redovna_cena && product.redovna_cena > product.cena && (
-                    <span className="text-xs text-[#555963] line-through flex-shrink-0">
-                      {formatPrice(product.redovna_cena)}
-                    </span>
+                      {/* Cena */}
+                      <span className={`text-base font-bold flex-shrink-0 ${isFirst ? "text-[#c8e64a]" : "text-[#e0e2e7]"}`}>
+                        {formatPrice(product.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span>
+                      </span>
+                    </>
                   )}
-
-                  {/* Cena */}
-                  <span className={`text-base font-bold flex-shrink-0 ${isFirst ? "text-[#c8e64a]" : suspicious ? "text-[#f59e0b]" : "text-[#e0e2e7]"}`}>
-                    {formatPrice(product.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span>
-                  </span>
 
                   {/* Dostupnost */}
                   {outOfStock && (

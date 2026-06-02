@@ -29,15 +29,34 @@ function hasSetKeyword(naziv) {
   return SET_KEYWORDS.test(naziv) || naziv.includes(" + ");
 }
 
+// Sentinel/placeholder cene — NISU realne cene, nego signal "nema cene / nedostupno"
+// koji pojedini sajtovi (npr. Shoppster vraća 999999 za nedostupne artikle) upišu
+// umesto da ostave prazno. Flaguju se UVEK, nezavisno od grupe — za razliku od
+// relativnih outliera, ovde nije potreban kontekst grupe da znamo da je cena lažna.
+// Oprezno: samo očigledne ponavljajuće cifre. Okrugle realne cene (100000) se NE diraju.
+const SENTINEL_PRICES = new Set([999999, 99999, 9999999, 1, 0]);
+function isSentinelPrice(cena) {
+  return cena != null && SENTINEL_PRICES.has(cena);
+}
+
 function detectOutliers(updates) {
+  const flagged = new Set();
+
+  // 1. Sentinel/placeholder cene — uvek nevažeće, nezavisno od grupe.
+  for (const u of updates) {
+    if (isSentinelPrice(u.cena)) flagged.add(u.id);
+  }
+
+  // 2. Relativni outlieri unutar grupe (≥3 ponude). Sentinel cene se isključuju
+  //    iz grupe da ne iskrive medijanu (999999 bi razvukao prag).
   const groups = {};
   for (const u of updates) {
     if (!u.match_key || !u.cena || u.cena <= 0) continue;
+    if (isSentinelPrice(u.cena)) continue;
     if (!groups[u.match_key]) groups[u.match_key] = [];
     groups[u.match_key].push(u);
   }
 
-  const flagged = new Set();
   for (const [, items] of Object.entries(groups)) {
     if (items.length < OUTLIER_MIN_GROUP) continue;
     // Skip heterogene grupe (mix solo/set/komplet) — varijacija je legitimna
@@ -201,8 +220,9 @@ async function main() {
 
   // 3.5 Detekcija sumnjivih cena (outlier u grupi)
   console.log("🚨 Detekcija sumnjivih cena...");
+  const sentinelCount = updates.filter((u) => isSentinelPrice(u.cena)).length;
   const flagged = detectOutliers(updates);
-  console.log(`   Flagovano: ${flagged.size} proizvoda (prag: grupa ≥${OUTLIER_MIN_GROUP}, cena >${OUTLIER_HIGH_MULT}× ili <${OUTLIER_LOW_MULT.toFixed(2)}× medijane)`);
+  console.log(`   Flagovano: ${flagged.size} proizvoda (${sentinelCount} sentinel + ${flagged.size - sentinelCount} grupni outlier)`);
   const flagRes = await batchUpdateFlags(updates, flagged);
   console.log(`   ✅ Ažurirano: ${flagRes.updated}`);
   if (flagRes.errors > 0) console.log(`   ❌ Grešaka: ${flagRes.errors}`);
