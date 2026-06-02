@@ -22,7 +22,7 @@ function getClient() {
   return _supabase;
 }
 
-const { normalizeBrand } = require(path.join(__dirname, "..", "..", "scripts", "lib", "brand-normalize"));
+const { resolveBrand } = require(path.join(__dirname, "..", "..", "scripts", "lib", "brand-normalize"));
 
 const PARENT_KATEGORIJA_MAP = {
   "Električni alat": "Električni alati",
@@ -57,7 +57,7 @@ async function upsertProducts(products, izvor) {
       sku: p.sku || null,
       naziv: p.naziv.trim(),
       brend: p.brend || null,
-      brend_normalized: normalizeBrand(p.brend),
+      brend_normalized: resolveBrand(p.brend, p.naziv),
       kategorija: p.kategorija || null,
       parent_kategorija: normalizeParentKategorija(p.parent_kategorija),
       cena: Math.round(p.cena),

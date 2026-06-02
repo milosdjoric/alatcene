@@ -228,4 +228,43 @@ function normalizeBrand(raw) {
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
 }
 
-module.exports = { normalizeBrand, BRAND_MAP };
+// Brendovi za skeniranje naziva — samo ne-null, ključ dužine ≥3. Kratki ključevi
+// ("ks", "b&w") su previše dvosmisleni za slepo skeniranje teksta. Duži ključevi
+// idu prvi da "black+decker" pobedi pre nego što "decker"/"black" uhvati deo.
+// Ključevi koji se kao reč prečesto javljaju u opisu, ne kao brend:
+//   "max" → "SDS-max" (tip prihvata), "Pro Max". Skeniranje naziva ih preskače.
+const NAME_SCAN_BLACKLIST = new Set(["max"]);
+
+const NAME_SCAN_BRANDS = Object.entries(BRAND_MAP)
+  .filter(([k, v]) => v && k.length >= 3 && !NAME_SCAN_BLACKLIST.has(k))
+  .map(([k, v]) => ({ key: k, brand: v }))
+  .sort((a, b) => b.key.length - a.key.length);
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Fallback ekstrakcija brenda iz NAZIVA kad scraped `brend` polje fali.
+ * Skenira naziv kroz BRAND_MAP uz granicu reči (slova/cifre/+/& čine token,
+ * tako da "rem" ne pogađa "kremen", a "black+decker" se hvata kao celina).
+ * Vraća normalizovan brend ili null.
+ */
+function extractBrandFromName(naziv) {
+  if (!naziv) return null;
+  const hay = naziv.toLowerCase();
+  for (const { key, brand } of NAME_SCAN_BRANDS) {
+    const re = new RegExp(`(?:^|[^a-z0-9+&])${escapeRegex(key)}(?:[^a-z0-9+&]|$)`, "i");
+    if (re.test(hay)) return brand;
+  }
+  return null;
+}
+
+/**
+ * Glavni ulaz za scrapere/import: prvo scraped brend polje, pa fallback na naziv.
+ */
+function resolveBrand(brend, naziv) {
+  return normalizeBrand(brend) ?? extractBrandFromName(naziv);
+}
+
+module.exports = { normalizeBrand, extractBrandFromName, resolveBrand, BRAND_MAP };
