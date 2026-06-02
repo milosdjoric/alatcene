@@ -53,7 +53,8 @@ export async function GET(request: Request) {
       query = query.order("updated_at", { ascending: false });
       break;
     case "usteda_desc":
-      query = query.order("usteda", { ascending: false, nullsFirst: false });
+      // Ušteda = popust po proizvodu (redovna_cena - cena), kolona popust_iznos.
+      query = query.order("popust_iznos", { ascending: false, nullsFirst: false });
       break;
     case "cena_asc":
     default:

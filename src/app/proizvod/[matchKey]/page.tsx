@@ -69,7 +69,15 @@ export default async function ProductComparePage({ params }: PageProps) {
   const trusted = products.filter((p) => !p.cena_sumnjiva);
   const bestTrusted = trusted[0] ?? best;
   const worstTrusted = trusted[trusted.length - 1] ?? products[products.length - 1];
-  const savings = trusted.length > 1 ? worstTrusted.cena - bestTrusted.cena : 0;
+  // Ušteda = najveći akcijski popust (redovna − akcijska cena) među ponudama,
+  // NE raspon cena između prodavnica. Realna ušteda je popust na jednom proizvodu.
+  const savings = trusted.reduce(
+    (max, p) =>
+      p.redovna_cena && p.redovna_cena > p.cena
+        ? Math.max(max, p.redovna_cena - p.cena)
+        : max,
+    0
+  );
 
   return (
     <>
@@ -119,7 +127,11 @@ export default async function ProductComparePage({ params }: PageProps) {
             </div>
             <div className="bg-[#16181d] border border-[#2a2d35] p-4">
               <p className="text-[10px] uppercase tracking-wider text-[#555963] mb-1">Ušteda</p>
-              <p className="text-xl font-bold text-[#c8e64a]">{formatPrice(savings)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
+              {savings > 0 ? (
+                <p className="text-xl font-bold text-[#c8e64a]">{formatPrice(savings)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
+              ) : (
+                <p className="text-xl font-bold text-[#555963]">&mdash;</p>
+              )}
             </div>
             {historicalMin != null && (
               <div className="bg-[#16181d] border border-[#2a2d35] p-4">

@@ -65,6 +65,8 @@ export interface ProductGroup {
   naziv: string;
   min_cena: number;
   max_cena: number;
+  max_popust: number;
+  max_popust_procenat: number;
   num_sources: number;
   historical_min_cena: number | null;
   offers: ProductOffer[];
