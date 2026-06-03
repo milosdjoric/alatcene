@@ -8,27 +8,32 @@ const DELAY_MS = 500;
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-const CATEGORIES = [
-  {
-    name: "Akumulatorski alati",
-    url: "/alati/akumulatorski-alat/",
-  },
-  {
-    name: "Električni alati",
-    url: "/alati/elektricni-alat/",
-  },
-];
+// Top grupe (samo alat) → naziv za parent_kategorija. Podkategorije čitamo sa
+// stranice svake grupe (putanja /alati/{top}/{sub}/) i koristimo kao `kategorija`.
+const PARENT_NAMES = {
+  "akumulatorski-alat": "Akumulatorski alati",
+  "elektricni-alat": "Električni alati",
+};
+const SKIP_SLUGS = new Set(["feed", "page"]);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function fetchPage(url) {
-  const res = await fetch(url, {
-    headers: { "User-Agent": USER_AGENT },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
+  // Timeout da fetch ne visi beskonačno ako server prestane da odgovara
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.text();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function parsePrice(text) {
@@ -141,44 +146,71 @@ function extractBrand(name, $el) {
 }
 
 function getMaxPage(html) {
-  const matches = html.match(/\/page\/(\d+)\//g) || [];
+  // Samo prava WooCommerce paginacija proizvoda — ne bilo koji /page/N/ na
+  // stranici (electro-advanced-pagination, widgeti) koji bi dao lažno velik broj.
+  const $ = cheerio.load(html);
   let max = 1;
-  for (const m of matches) {
-    const num = parseInt(m.match(/(\d+)/)[1]);
-    if (num > max) max = num;
-  }
+  $("nav.woocommerce-pagination a.page-numbers").each((_, el) => {
+    const href = $(el).attr("href") || "";
+    const hm = href.match(/\/page\/(\d+)\//);
+    if (hm) max = Math.max(max, parseInt(hm[1]));
+    const t = $(el).text().trim();
+    if (/^\d+$/.test(t)) max = Math.max(max, parseInt(t));
+  });
   return max;
 }
 
-async function fetchCategory(category) {
+// Pročitaj podkategorije sa stranice svake top grupe (putanja /alati/{top}/{sub}/).
+async function fetchCategories() {
+  const out = [];
+  const seen = new Set();
+
+  for (const [top, parentName] of Object.entries(PARENT_NAMES)) {
+    const html = await fetchPage(`${BASE}/alati/${top}/`);
+    const $ = cheerio.load(html);
+    const re = new RegExp(`/alati/${top}/([a-z0-9-]+)/$`);
+
+    $("a[href]").each((_, el) => {
+      const href = $(el).attr("href") || "";
+      const m = href.match(re);
+      if (!m || SKIP_SLUGS.has(m[1])) return;
+      const naziv = $(el)
+        .text()
+        .trim()
+        .replace(/\s+/g, " ")
+        .replace(/\s*\(\d+\)\s*$/, "");
+      if (!naziv || naziv.length > 50 || seen.has(m[1])) return;
+      seen.add(m[1]);
+      out.push({
+        url: `${BASE}/alati/${top}/${m[1]}/`,
+        kategorija: naziv,
+        parent: parentName,
+      });
+    });
+  }
+
+  return out;
+}
+
+// Scrape svih stranica jednog kategorija URL-a (WooCommerce page/N).
+async function fetchCategoryProducts(url, label) {
   const products = [];
-  const fullUrl = BASE + category.url;
-
-  console.log(`\n📦 ${category.name}`);
-
-  const firstHtml = await fetchPage(fullUrl);
+  const firstHtml = await fetchPage(url);
   const totalPages = getMaxPage(firstHtml);
-  console.log(`   ${totalPages} stranica`);
 
   products.push(...parseProducts(firstHtml));
-  console.log(`   Stranica 1/${totalPages} — ${products.length} proizvoda`);
 
   for (let page = 2; page <= totalPages; page++) {
     await sleep(DELAY_MS);
     try {
-      const html = await fetchPage(`${fullUrl}page/${page}/`);
+      const html = await fetchPage(`${url}page/${page}/`);
       products.push(...parseProducts(html));
-
-      if (page % 10 === 0 || page === totalPages) {
-        console.log(
-          `   Stranica ${page}/${totalPages} — ukupno ${products.length}`
-        );
-      }
     } catch (err) {
-      console.error(`   ⚠️ Stranica ${page}: ${err.message}`);
+      console.error(`   ⚠️ ${label} str. ${page}: ${err.message}`);
     }
   }
 
+  console.log(`   ${label} — ${products.length} proizvoda (${totalPages} str.)`);
   return products;
 }
 
@@ -186,31 +218,51 @@ async function main() {
   console.log("Omni Alati Scraper — start");
   console.log("=".repeat(40));
 
-  const allProducts = [];
+  const subcats = await fetchCategories();
+  console.log(`Pronađeno ${subcats.length} podkategorija\n`);
 
-  for (const cat of CATEGORIES) {
-    const products = await fetchCategory(cat);
+  // id/url → proizvod; prvi (specifična podkategorija) pobeđuje nad root fallback
+  const byKey = new Map();
+  const addProducts = (products, kategorija, parent) => {
     for (const p of products) {
-      p.parent_kategorija = cat.name;
+      const key = p.id || p.url;
+      if (byKey.has(key)) continue;
+      p.kategorija = kategorija;
+      p.parent_kategorija = parent;
+      byKey.set(key, p);
     }
-    allProducts.push(...products);
+  };
+
+  // 1. Podkategorije
+  console.log("📦 Podkategorije:");
+  for (const cat of subcats) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(cat.url, cat.kategorija);
+      addProducts(products, cat.kategorija, cat.parent);
+    } catch (err) {
+      console.error(`   ⚠️ ${cat.kategorija}: ${err.message}`);
+    }
   }
 
-  // Deduplikacija
-  const seen = new Set();
-  const unique = [];
-  for (const p of allProducts) {
-    const key = p.id || p.url;
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(p);
+  // 2. Root grupe — fallback za proizvode van podkategorija
+  console.log("\n📦 Root grupe (fallback):");
+  for (const [slug, name] of Object.entries(PARENT_NAMES)) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(`${BASE}/alati/${slug}/`, name);
+      addProducts(products, null, name);
+    } catch (err) {
+      console.error(`   ⚠️ ${name}: ${err.message}`);
     }
   }
+
+  const unique = [...byKey.values()];
+  const withCat = unique.filter((p) => p.kategorija).length;
 
   console.log(`\n${"=".repeat(40)}`);
-  console.log(
-    `Ukupno: ${unique.length} jedinstvenih (od ${allProducts.length})`
-  );
+  console.log(`Ukupno: ${unique.length} jedinstvenih`);
+  console.log(`Sa podkategorijom: ${withCat} (${((withCat / unique.length) * 100).toFixed(1)}%)`);
 
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = path.join(DATA_DIR, `omni-alati_${timestamp}.json`);
