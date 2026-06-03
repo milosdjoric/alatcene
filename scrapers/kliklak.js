@@ -29,9 +29,26 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Mapa product_id → kategorija iz dataLayer-a na listing stranici.
+// kliklak emituje tačnu kategoriju ("Bušilice", "Brusilice"...) po proizvodu
+// u GA ecommerce items, pa je ne moramo vaditi sa svake product stranice.
+function buildCategoryMap(html) {
+  const map = new Map();
+  const re =
+    /"item_id":(\d+),"item_name":"(?:[^"\\]|\\.)*","item_category":"((?:[^"\\]|\\.)*)"/g;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    try {
+      map.set(m[1], JSON.parse(`"${m[2]}"`)); // dekodira \uXXXX i escape
+    } catch {}
+  }
+  return map;
+}
+
 function parsePageProducts(html) {
   const $ = cheerio.load(html);
   const products = [];
+  const catMap = buildCategoryMap(html);
 
   $(".product.product--grid").each((_, el) => {
     const $el = $(el);
@@ -45,6 +62,8 @@ function parsePageProducts(html) {
       try { id = String(JSON.parse(cartData)[0]?.product_id); } catch {}
     }
     if (!id) id = $el.find("[data-wishlist-toggle]").attr("data-wishlist-toggle") || null;
+
+    const kategorija = id ? catMap.get(String(id)) || null : null;
 
     const currentText = $el.find(".product__info--price-gross").first().text().trim();
     const oldText = $el.find(".product__info--old-price-gross").first().text().trim();
@@ -64,7 +83,7 @@ function parsePageProducts(html) {
     const dostupnost = $el.find("a.product__add-to-cart").length > 0 ? "NA_STANJU" : "RASPRODATO";
 
     if (naziv && cena) {
-      products.push({ id, naziv, brend: extractBrand(naziv), cena, redovna_cena: redovnaCena, popust_procenat: popustProcenat, popust_iznos: popustIznos, valuta: "RSD", dostupnost, url, izvor: "kliklak", parent_kategorija: parentKat });
+      products.push({ id, naziv, brend: extractBrand(naziv), cena, redovna_cena: redovnaCena, popust_procenat: popustProcenat, popust_iznos: popustIznos, valuta: "RSD", dostupnost, url, izvor: "kliklak", kategorija, parent_kategorija: parentKat });
     }
   });
 
