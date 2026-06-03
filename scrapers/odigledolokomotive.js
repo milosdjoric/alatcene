@@ -1,3 +1,4 @@
+const { jeSklonjenaKategorija } = require("./lib/klasifikacija");
 const fs = require("fs");
 const path = require("path");
 const cheerio = require("cheerio");
@@ -132,6 +133,10 @@ async function main() {
 
     for (let i = 0; i < subcats.length; i++) {
       const subName = subcats[i].replace("/proizvodi/", "").replace(/\/$/, "").replace(/-/g, " ");
+      if (jeSklonjenaKategorija(subName)) {
+        console.log(`   [${i + 1}/${subcats.length}] ⏭️  van domena: ${subName}`);
+        continue;
+      }
       const products = await fetchSubcategory(subcats[i], subName);
 
       for (const p of products) {

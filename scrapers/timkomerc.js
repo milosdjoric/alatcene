@@ -1,3 +1,4 @@
+const { jeSklonjenaKategorija } = require("./lib/klasifikacija");
 const fs = require("fs");
 const path = require("path");
 const cheerio = require("cheerio");
@@ -160,6 +161,11 @@ async function fetchCategoryWithPagination(url, name, parentName) {
   if (subcats.length > 0) {
     // Rekurzivno obradi podkategorije
     for (const sub of subcats) {
+      // Van domena (pribor, lampe, bašta, ...) — preskačemo ceo podstablo.
+      if (jeSklonjenaKategorija(sub.name)) {
+        console.log(`   ⏭️  van domena: ${sub.name}`);
+        continue;
+      }
       await sleep(DELAY_MS);
       const subProducts = await fetchCategoryWithPagination(
         sub.url,

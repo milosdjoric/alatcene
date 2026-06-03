@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const cheerio = require("cheerio");
+const { jeSklonjenaKategorija } = require("./lib/klasifikacija");
 
 const DATA_DIR = path.join(__dirname, "..", "data");
 const BASE = "https://www.superalati.rs";
@@ -208,6 +209,13 @@ async function main() {
 
     for (let i = 0; i < subcategories.length; i++) {
       const sub = subcategories[i];
+
+      // Van domena (pribor, lampe, bašta, ...) — ne skrejpujemo uopšte.
+      if (jeSklonjenaKategorija(sub.name)) {
+        console.log(`   [${i + 1}/${subcategories.length}] ⏭️  van domena: ${sub.name}`);
+        continue;
+      }
+
       await sleep(DELAY_MS);
 
       try {

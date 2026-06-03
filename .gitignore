@@ -7,3 +7,4 @@ data/*.log
 !data/manifest.json
 .DS_Store
 .vercel
+.mdjdocs/backups/

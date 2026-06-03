@@ -23,6 +23,7 @@ function getClient() {
 }
 
 const { resolveBrand } = require(path.join(__dirname, "..", "..", "scripts", "lib", "brand-normalize"));
+const { jeSklonjenaKategorija } = require(path.join(__dirname, "klasifikacija"));
 
 const PARENT_KATEGORIJA_MAP = {
   "Električni alat": "Električni alati",
@@ -42,9 +43,22 @@ async function upsertProducts(products, izvor) {
     return;
   }
 
+  // Odbaci kategorije van domena (pribor, lampe, bašta, ...) — ne ulaze u bazu.
+  let skinuto = 0;
+  const uDomenu = products.filter((p) => {
+    if (jeSklonjenaKategorija(p.kategorija)) {
+      skinuto++;
+      return false;
+    }
+    return true;
+  });
+  if (skinuto > 0) {
+    console.log(`   🚫 Van domena (preskočeno): ${skinuto}`);
+  }
+
   // Deduplikacija
   const seen = new Set();
-  const rows = products
+  const rows = uDomenu
     .filter((p) => {
       if (!p.cena || !p.naziv) return false;
       const key = String(p.id || p.sku || p.url);
