@@ -147,7 +147,10 @@ function findSubcategories(html, parentUrl) {
   return subs;
 }
 
-async function fetchCategoryWithPagination(url, name) {
+// name = naziv trenutne (pod)kategorije, parentName = top grupa.
+// Kad stigne do leaf-a (nema podkategorija), proizvodi dobijaju
+// kategorija = name (najspecifičnija) i parent_kategorija = parentName.
+async function fetchCategoryWithPagination(url, name, parentName) {
   const products = [];
 
   const firstHtml = await fetchPage(url);
@@ -160,17 +163,22 @@ async function fetchCategoryWithPagination(url, name) {
       await sleep(DELAY_MS);
       const subProducts = await fetchCategoryWithPagination(
         sub.url,
-        sub.name
+        sub.name,
+        parentName
       );
       products.push(...subProducts);
     }
     return products;
   }
 
-  // Nema podkategorija — parsaj proizvode
+  // Leaf — parsaj proizvode i dodeli kategoriju
+  // (ako je leaf ujedno i top grupa, kategorija ostaje null)
+  const kategorija = name === parentName ? null : name;
+  const tag = (list) =>
+    list.map((p) => ({ ...p, kategorija, parent_kategorija: parentName }));
+
   const maxPage = getMaxPage(firstHtml);
-  const firstProducts = parseProducts(firstHtml);
-  products.push(...firstProducts);
+  products.push(...tag(parseProducts(firstHtml)));
 
   for (let page = 2; page <= maxPage; page++) {
     await sleep(DELAY_MS);
@@ -179,7 +187,7 @@ async function fetchCategoryWithPagination(url, name) {
         ? `${url}page/${page}/`
         : `${url}/page/${page}/`;
       const html = await fetchPage(pageUrl);
-      products.push(...parseProducts(html));
+      products.push(...tag(parseProducts(html)));
     } catch (err) {
       // Stranica ne postoji
     }
@@ -200,10 +208,11 @@ async function main() {
 
   for (const cat of PARENT_CATEGORIES) {
     console.log(`\n📦 ${cat.name}`);
-    const products = await fetchCategoryWithPagination(BASE + cat.url, cat.name);
-    for (const p of products) {
-      p.parent_kategorija = cat.name;
-    }
+    const products = await fetchCategoryWithPagination(
+      BASE + cat.url,
+      cat.name,
+      cat.name
+    );
     allProducts.push(...products);
   }
 
