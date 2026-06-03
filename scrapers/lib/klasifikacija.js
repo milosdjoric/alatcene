@@ -44,6 +44,9 @@ const SKLONI_KEYS = [
   // --- VODOINSTALATER / CEVI ---
   "vodoinstalater", "pegle za spajanje", "pegla za pvc", "nareznic",
   "obradu cevi", "secenje i obradu cevi", "pumpe za instalacije",
+  // --- ZAŠTITNA OPREMA (LZO) ---
+  "zastitn", "zastita opreme", "licna zastita", "lzo", "maska", "maske",
+  "rukavic", "naocar", "kacig", "antifon", "vizir", "stitnik", "kombinezon",
 ];
 
 // NIKAD ne sklanjaj — mašine-alati / pravi alat koje gornji ključevi lažno hvataju.
