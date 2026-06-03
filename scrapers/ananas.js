@@ -11,14 +11,16 @@ const ALGOLIA_URL = `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${ALGOL
 const HITS_PER_PAGE = 1000;
 const DELAY_MS = 500;
 
-const CATEGORIES = [
+// Top grupe (lvl1). Prave podkategorije čitamo iz lvl2 faceta svake grupe —
+// categoryNames u hitu je nepouzdan (često vraća samo "Uradi sam").
+const TOP_GROUPS = [
   {
     name: "Akumulatorski alati",
-    facet: "Uradi sam > Aku alat (Akumulatorski alati)",
+    lvl1: "Uradi sam > Aku alat (Akumulatorski alati)",
   },
   {
     name: "Električni alati",
-    facet: "Uradi sam > Električni alati",
+    lvl1: "Uradi sam > Električni alati",
   },
 ];
 
@@ -44,7 +46,7 @@ function extractProduct(hit) {
     sku: p.ean || null,
     naziv: p.name || hit.name || "",
     brend: p.brand || null,
-    kategorija: (p.categoryNames || []).slice(-1)[0] || null,
+    kategorija: null, // postavlja se iz lvl2 faceta u fetchSubcategory
     cena: hit.price ? Math.round(hit.price) : null,
     redovna_cena: hit.basePrice ? Math.round(hit.basePrice) : null,
     popust_procenat: hit.discountPercentage ? Math.round(hit.discountPercentage) : null,
@@ -63,12 +65,46 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchCategory(category) {
+// Pročitaj lvl2 podkategorije za jednu top grupu (npr "... > Aku bušilice i šrafilice").
+async function fetchSubcategories(lvl1) {
+  const res = await fetch(ALGOLIA_URL, {
+    method: "POST",
+    headers: {
+      "X-Algolia-Application-Id": ALGOLIA_APP_ID,
+      "X-Algolia-API-Key": ALGOLIA_API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: "",
+      hitsPerPage: 0,
+      page: 0,
+      facetFilters: [`product.categories.lvl1:${lvl1}`],
+      maxValuesPerFacet: 200,
+      facets: ["product.categories.lvl2"],
+    }),
+  });
+  if (!res.ok) throw new Error(`Algolia facet greška: ${res.status}`);
+  const data = await res.json();
+  const facet = data.facets?.["product.categories.lvl2"] || {};
+  // Ananas proizvodi pripadaju više stabala — facet lvl2 vraća i strane putanje
+  // (npr "Telefoni > ... > Power bank"). Zadrži samo prave podkat ove grupe.
+  const prefix = `${lvl1} > `;
+  return Object.keys(facet)
+    .filter((path) => path.startsWith(prefix))
+    .map((path) => ({
+      facet: path,
+      lvl1,
+      kategorija: path.split(" > ").slice(-1)[0],
+    }));
+}
+
+// Povuci sve proizvode jedne lvl2 podkategorije i obeleži ih tom kategorijom.
+async function fetchSubcategory(sub) {
   const products = [];
   let page = 0;
   let totalPages = 1;
 
-  console.log(`\n📦 ${category.name}`);
+  console.log(`   📦 ${sub.kategorija}`);
 
   while (page < totalPages) {
     const res = await fetch(ALGOLIA_URL, {
@@ -82,12 +118,14 @@ async function fetchCategory(category) {
         query: "",
         hitsPerPage: HITS_PER_PAGE,
         page,
-        facetFilters: [`product.categories.lvl1:${category.facet}`],
+        facetFilters: [
+          `product.categories.lvl1:${sub.lvl1}`,
+          `product.categories.lvl2:${sub.facet}`,
+        ],
         attributesToRetrieve: [
           "objectID", "price", "basePrice", "onSale",
           "discountPercentage", "discountAmount", "onStock", "available",
           "product.name", "product.brand", "product.slug", "product.ean",
-          "product.categoryNames",
           "product.measurementAttributes", "product.textAttributes",
           "product.selectAttributes",
         ],
@@ -95,24 +133,20 @@ async function fetchCategory(category) {
     });
 
     if (!res.ok) {
-      console.error(`   ⚠️ Algolia greška: ${res.status}`);
+      console.error(`      ⚠️ Algolia greška: ${res.status}`);
       break;
     }
 
     const data = await res.json();
-
-    if (page === 0) {
-      totalPages = data.nbPages || 1;
-      console.log(`   Ukupno: ${data.nbHits} proizvoda, ${totalPages} stranica`);
-    }
+    if (page === 0) totalPages = data.nbPages || 1;
 
     for (const hit of data.hits || []) {
-      products.push(extractProduct(hit));
+      const p = extractProduct(hit);
+      p.kategorija = sub.kategorija;
+      products.push(p);
     }
 
-    console.log(`   Stranica ${page + 1}/${totalPages} — ukupno ${products.length} proizvoda`);
     page++;
-
     if (page < totalPages) await sleep(DELAY_MS);
   }
 
@@ -125,15 +159,20 @@ async function main() {
 
   const allProducts = [];
 
-  for (const cat of CATEGORIES) {
-    const products = await fetchCategory(cat);
-    for (const p of products) {
-      p.parent_kategorija = cat.name;
+  for (const group of TOP_GROUPS) {
+    console.log(`\n📦 ${group.name}`);
+    const subs = await fetchSubcategories(group.lvl1);
+    console.log(`   Pronađeno ${subs.length} podkategorija`);
+    await sleep(DELAY_MS);
+    for (const sub of subs) {
+      const products = await fetchSubcategory(sub);
+      for (const p of products) p.parent_kategorija = group.name;
+      allProducts.push(...products);
+      await sleep(DELAY_MS);
     }
-    allProducts.push(...products);
   }
 
-  // Deduplikacija po ID
+  // Deduplikacija po ID (proizvod ume da bude u 2 podkategorije — prvi pobeđuje)
   const seen = new Set();
   const unique = allProducts.filter((p) => {
     if (seen.has(p.id)) return false;
@@ -141,8 +180,10 @@ async function main() {
     return true;
   });
 
+  const withCat = unique.filter((p) => p.kategorija).length;
   console.log(`\n${"=".repeat(40)}`);
-  console.log(`Ukupno: ${unique.length} proizvoda (pre dedup: ${allProducts.length})`);
+  console.log(`Ukupno: ${unique.length} jedinstvenih (pre dedup: ${allProducts.length})`);
+  console.log(`Sa podkategorijom: ${withCat} (${((withCat / unique.length) * 100).toFixed(1)}%)`);
 
   // Sačuvaj
   const timestamp = new Date().toISOString().slice(0, 10);
