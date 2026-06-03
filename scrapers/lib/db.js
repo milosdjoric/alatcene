@@ -56,6 +56,10 @@ async function upsertProducts(products, izvor) {
     console.log(`   🚫 Van domena (preskočeno): ${skinuto}`);
   }
 
+  // Jedan timestamp za ceo run — svi osveženi proizvodi dobijaju isti updated_at,
+  // pa stale-cleanup posle upserta lako prepozna neosvežene (duhove).
+  const runTs = new Date().toISOString();
+
   // Deduplikacija
   const seen = new Set();
   const rows = uDomenu
@@ -85,8 +89,14 @@ async function upsertProducts(products, izvor) {
       ocena: p.ocena || null,
       broj_recenzija: p.broj_recenzija || null,
       specifikacije: p.specifikacije ? JSON.stringify(p.specifikacije) : null,
-      updated_at: new Date().toISOString(),
+      updated_at: runTs,
     }));
+
+  // Broj proizvoda izvora PRE upserta — za zaštitu stale-cleanup-a.
+  const { count: existingBefore } = await supabase
+    .from("products")
+    .select("*", { count: "exact", head: true })
+    .eq("izvor", izvor);
 
   let imported = 0;
   let errors = 0;
@@ -105,6 +115,30 @@ async function upsertProducts(products, izvor) {
   }
 
   console.log(`   📊 DB: ${imported} upserted, ${errors} grešaka`);
+
+  // Stale-cleanup: obriši proizvode ovog izvora koji NISU osveženi u ovom prolazu
+  // (nestali sa sajta — duhovi). FK price_history je ON DELETE CASCADE.
+  // ZAŠTITA: preskoči ako je scrape vratio <50% prethodnog broja (verovatno pao),
+  // da delimično pao scrape ne obriše pola kataloga.
+  if (errors === 0 && rows.length > 0) {
+    const prag = (existingBefore || 0) * 0.5;
+    if (!existingBefore || rows.length >= prag) {
+      const { count: deleted, error: delErr } = await supabase
+        .from("products")
+        .delete({ count: "exact" })
+        .eq("izvor", izvor)
+        .lt("updated_at", runTs);
+      if (delErr) {
+        console.error(`   ⚠️ Stale-cleanup greška: ${delErr.message}`);
+      } else if (deleted > 0) {
+        console.log(`   🧹 Stale-cleanup: obrisano ${deleted} duha (nestali sa sajta)`);
+      }
+    } else {
+      console.warn(
+        `   ⚠️ Stale-cleanup PRESKOČEN: scrape vratio ${rows.length} < ${Math.round(prag)} (50% od ${existingBefore}) — moguć pad scrape-a`
+      );
+    }
+  }
 }
 
 module.exports = { upsertProducts };
