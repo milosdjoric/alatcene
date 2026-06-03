@@ -74,6 +74,9 @@ function parseProducts(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
+        // Magento + Constructor.io listing ne nosi stock info (nema cenu/dugme/
+        // stock na kartici). Magento po defaultu skriva rasprodate sa listinga,
+        // pa je sve što vidimo na stanju; nestale hvata stale-cleanup u db.js.
         dostupnost: "NA_STANJU",
         url,
         izvor: "eplaneta",

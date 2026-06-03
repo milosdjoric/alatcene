@@ -85,6 +85,10 @@ function parseProducts(html) {
       $el.find('a[href*="/brand/"]').first().text().trim().replace(/\s*alati$/i, "") ||
       null;
 
+    // WooCommerce: na-stanju proizvodi imaju "dodaj u korpu" dugme,
+    // rasprodati samo "Pročitaj više" link (bez add_to_cart_button).
+    const naStanju = $el.find(".add_to_cart_button").length > 0;
+
     if (naziv && cena) {
       products.push({
         id,
@@ -96,7 +100,7 @@ function parseProducts(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
-        dostupnost: "NA_STANJU",
+        dostupnost: naStanju ? "NA_STANJU" : "RASPRODATO",
         url: url.startsWith("http") ? url : BASE + url,
         izvor: "simns",
       });

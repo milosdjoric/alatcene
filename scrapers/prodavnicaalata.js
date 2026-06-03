@@ -68,7 +68,7 @@ function parsePage(html) {
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
-        dostupnost: "NA_STANJU",
+        dostupnost: stanje > 0 ? "NA_STANJU" : "RASPRODATO",
         kolicina_na_stanju: stanje,
         url: url.startsWith("http") ? url : BASE + url,
         izvor: "prodavnicaalata",

@@ -41,7 +41,11 @@ function extractProduct(p) {
     ocena: p.averageRating ?? null,
     broj_recenzija: p.numberOfReviewComments ?? 0,
     url: `https://www.shoppster.rs/p/${p.code}`,
-    dostupnost: "NA_STANJU",
+    // Čitaj stvarno stanje iz API-ja umesto hardkodiranog NA_STANJU.
+    dostupnost:
+      p.stock?.stockLevelStatus === "inStock" && p.productStatus !== "NOT_SALEABLE"
+        ? "NA_STANJU"
+        : "RASPRODATO",
     izvor: "shoppster",
   };
 }
