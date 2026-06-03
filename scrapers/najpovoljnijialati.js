@@ -8,16 +8,12 @@ const DELAY_MS = 400;
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-const CATEGORIES = [
-  {
-    name: "Akumulatorski alati",
-    url: "/kategorija/akumulatorski-alat/",
-  },
-  {
-    name: "Električni alati",
-    url: "/kategorija/elektricni-alat/",
-  },
-];
+// Top grupe koje skupljamo (samo alat) → naziv za parent_kategorija.
+// Podkategorije unutar njih čitamo iz menija i koristimo kao `kategorija`.
+const PARENT_NAMES = {
+  "elektricni-alat": "Električni alati",
+  "akumulatorski-alat": "Akumulatorski alati",
+};
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -112,35 +108,55 @@ function getMaxPage(html) {
   return max;
 }
 
-async function fetchCategory(category) {
+// Pročitaj podkategorije sa stranice svake top grupe (ne iz homepage menija —
+// on prikazuje samo deo). Hvata direktne podkategorije (jedan segment ispod top).
+async function fetchCategories() {
+  const out = [];
+  const seen = new Set();
+
+  for (const [top, parentName] of Object.entries(PARENT_NAMES)) {
+    const html = await fetchPage(`${BASE}/kategorija/${top}/`);
+    const $ = cheerio.load(html);
+    const re = new RegExp(`/kategorija/${top}/([^/]+)/?$`);
+
+    $(`a[href*="/kategorija/${top}/"]`).each((_, el) => {
+      const href = $(el).attr("href") || "";
+      const naziv = $(el).text().trim().replace(/\s+/g, " ");
+      const m = href.match(re);
+      if (!m || !naziv || naziv.length > 40) return;
+
+      const key = `${top}/${m[1]}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push({
+        url: href.endsWith("/") ? href : `${href}/`,
+        kategorija: naziv,
+        parent: parentName,
+      });
+    });
+  }
+
+  return out;
+}
+
+// Scrape svih stranica jednog kategorija URL-a.
+async function fetchCategoryProducts(catUrl, label) {
   const products = [];
-  const fullUrl = BASE + category.url;
-
-  console.log(`\n📦 ${category.name}`);
-
-  const firstHtml = await fetchPage(fullUrl);
+  const firstHtml = await fetchPage(catUrl);
   const totalPages = getMaxPage(firstHtml);
-  console.log(`   ${totalPages} stranica`);
-
   products.push(...parseProducts(firstHtml));
-  console.log(`   Stranica 1/${totalPages} — ${products.length} proizvoda`);
 
   for (let page = 2; page <= totalPages; page++) {
     await sleep(DELAY_MS);
     try {
-      const html = await fetchPage(`${fullUrl}page/${page}/`);
+      const html = await fetchPage(`${catUrl}page/${page}/`);
       products.push(...parseProducts(html));
-
-      if (page % 20 === 0 || page === totalPages) {
-        console.log(
-          `   Stranica ${page}/${totalPages} — ukupno ${products.length}`
-        );
-      }
     } catch (err) {
-      console.error(`   ⚠️ Stranica ${page}: ${err.message}`);
+      console.error(`   ⚠️ ${label} str. ${page}: ${err.message}`);
     }
   }
 
+  console.log(`   ${label} — ${products.length} proizvoda (${totalPages} str.)`);
   return products;
 }
 
@@ -148,30 +164,51 @@ async function main() {
   console.log("Najpovoljniji Alati Scraper — start");
   console.log("=".repeat(40));
 
-  const allProducts = [];
+  const subcats = await fetchCategories();
+  console.log(`Pronađeno ${subcats.length} podkategorija u meniju\n`);
 
-  for (const cat of CATEGORIES) {
-    const products = await fetchCategory(cat);
+  // id/url → proizvod; prvi (najdublja kategorija) pobeđuje
+  const byKey = new Map();
+  const addProducts = (products, kategorija, parent) => {
     for (const p of products) {
-      p.parent_kategorija = cat.name;
+      const key = p.id || p.url;
+      if (byKey.has(key)) continue;
+      p.kategorija = kategorija;
+      p.parent_kategorija = parent;
+      byKey.set(key, p);
     }
-    allProducts.push(...products);
+  };
+
+  // 1. Podkategorije — najdublje prvo
+  console.log("📦 Podkategorije:");
+  for (const cat of subcats) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(cat.url, cat.kategorija);
+      addProducts(products, cat.kategorija, cat.parent);
+    } catch (err) {
+      console.error(`   ⚠️ ${cat.kategorija}: ${err.message}`);
+    }
   }
 
-  const seen = new Set();
-  const unique = [];
-  for (const p of allProducts) {
-    const key = p.id || p.url;
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(p);
+  // 2. Root grupe — fallback za proizvode koji nisu ni u jednoj podkategoriji
+  console.log("\n📦 Root grupe (fallback):");
+  for (const [slug, name] of Object.entries(PARENT_NAMES)) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(`${BASE}/kategorija/${slug}/`, name);
+      addProducts(products, null, name);
+    } catch (err) {
+      console.error(`   ⚠️ ${name}: ${err.message}`);
     }
   }
+
+  const unique = [...byKey.values()];
+  const withCat = unique.filter((p) => p.kategorija).length;
 
   console.log(`\n${"=".repeat(40)}`);
-  console.log(
-    `Ukupno: ${unique.length} jedinstvenih (od ${allProducts.length})`
-  );
+  console.log(`Ukupno: ${unique.length} jedinstvenih`);
+  console.log(`Sa podkategorijom: ${withCat} (${((withCat / unique.length) * 100).toFixed(1)}%)`);
 
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = path.join(DATA_DIR, `najpovoljnijialati_${timestamp}.json`);
