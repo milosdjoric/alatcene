@@ -8,16 +8,12 @@ const DELAY_MS = 400;
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-const CATEGORIES = [
-  {
-    name: "Akumulatorski alati",
-    url: "/proizvodi/kategorije/akumulatorski-alati/",
-  },
-  {
-    name: "Električni alat",
-    url: "/proizvodi/kategorije/elektricni-alat/",
-  },
-];
+// Top grupe (samo alat) → naziv za parent_kategorija. Podkategorije čitamo sa
+// stranice svake grupe (blok .subcategory-item) i koristimo kao `kategorija`.
+const PARENT_NAMES = {
+  "elektricni-alat": "Električni alat",
+  "akumulatorski-alati": "Akumulatorski alati",
+};
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -44,7 +40,6 @@ function parsePage(html) {
     const naziv =
       $btn.attr("data-label") ||
       $el.find(".product-card__name a").text().trim();
-    const slug = $btn.attr("data-slug") || "";
     const stanje = parseInt($btn.attr("data-stock"), 10) || 0;
     const redovnaCena = parseFloat($btn.attr("data-price")) || null;
     const akcijskaCena = parseFloat($btn.attr("data-sale_price")) || null;
@@ -58,9 +53,7 @@ function parsePage(html) {
       popustProcenat = Math.round((popustIznos / redovnaCena) * 100);
     }
 
-    // Brend iz slike proizvođača
-    const brend =
-      $el.find("img.product-manuf-list-img").attr("alt") || null;
+    const brend = $el.find("img.product-manuf-list-img").attr("alt") || null;
 
     const url = $el.find(".product-card__name a").attr("href") || "";
 
@@ -97,38 +90,54 @@ function getTotalPages(html) {
   return max;
 }
 
-async function fetchCategory(category) {
+// Pročitaj podkategorije sa stranice svake top grupe (blok .subcategory-item).
+async function fetchCategories() {
+  const out = [];
+  const seen = new Set();
+
+  for (const [top, parentName] of Object.entries(PARENT_NAMES)) {
+    const html = await fetchPage(`${BASE}/proizvodi/kategorije/${top}/`);
+    const $ = cheerio.load(html);
+
+    $(".subcategory-item").each((_, el) => {
+      const $a = $(el).find("a").first();
+      const href = $a.attr("href") || "";
+      const naziv = ($a.find("img").attr("alt") || $a.text())
+        .trim()
+        .replace(/\s+/g, " ");
+      const m = href.match(/\/proizvodi\/kategorije\/([a-z0-9-]+)\/?$/);
+      if (!m || !naziv || seen.has(m[1])) return;
+      seen.add(m[1]);
+      out.push({
+        url: `${BASE}/proizvodi/kategorije/${m[1]}/`,
+        kategorija: naziv,
+        parent: parentName,
+      });
+    });
+  }
+
+  return out;
+}
+
+// Scrape svih stranica jednog kategorija URL-a (paginacija .../strana/N/).
+async function fetchCategoryProducts(url, label) {
   const products = [];
-  const fullUrl = BASE + category.url;
-
-  console.log(`\n📦 ${category.name}`);
-
-  const firstHtml = await fetchPage(fullUrl);
+  const firstHtml = await fetchPage(url);
   const totalPages = getTotalPages(firstHtml);
-  console.log(`   ${totalPages} stranica`);
 
-  const firstProducts = parsePage(firstHtml);
-  products.push(...firstProducts);
-  console.log(`   Stranica 1/${totalPages} — ${products.length} proizvoda`);
+  products.push(...parsePage(firstHtml));
 
   for (let page = 2; page <= totalPages; page++) {
     await sleep(DELAY_MS);
-
     try {
-      const html = await fetchPage(`${fullUrl}strana/${page}/`);
-      const pageProducts = parsePage(html);
-      products.push(...pageProducts);
-
-      if (page % 25 === 0 || page === totalPages) {
-        console.log(
-          `   Stranica ${page}/${totalPages} — ukupno ${products.length} proizvoda`
-        );
-      }
+      const html = await fetchPage(`${url}strana/${page}/`);
+      products.push(...parsePage(html));
     } catch (err) {
-      console.error(`   ⚠️ Stranica ${page}: ${err.message}`);
+      console.error(`   ⚠️ ${label} str. ${page}: ${err.message}`);
     }
   }
 
+  console.log(`   ${label} — ${products.length} proizvoda (${totalPages} str.)`);
   return products;
 }
 
@@ -136,29 +145,65 @@ async function main() {
   console.log("Prodavnica Alata Scraper — start");
   console.log("=".repeat(40));
 
-  const allProducts = [];
+  const subcats = await fetchCategories();
+  console.log(`Pronađeno ${subcats.length} podkategorija\n`);
 
-  for (const cat of CATEGORIES) {
-    const products = await fetchCategory(cat);
+  // id/url → proizvod; prvi (specifična podkategorija) pobeđuje nad root fallback
+  const byKey = new Map();
+  const addProducts = (products, kategorija, parent) => {
     for (const p of products) {
-      p.parent_kategorija = cat.name;
+      const key = p.id || p.url;
+      if (byKey.has(key)) continue;
+      p.kategorija = kategorija;
+      p.parent_kategorija = parent;
+      byKey.set(key, p);
     }
-    allProducts.push(...products);
+  };
+
+  // 1. Podkategorije
+  console.log("📦 Podkategorije:");
+  for (const cat of subcats) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(cat.url, cat.kategorija);
+      addProducts(products, cat.kategorija, cat.parent);
+    } catch (err) {
+      console.error(`   ⚠️ ${cat.kategorija}: ${err.message}`);
+    }
   }
 
+  // 2. Root grupe — fallback za proizvode van podkategorija
+  console.log("\n📦 Root grupe (fallback):");
+  for (const [slug, name] of Object.entries(PARENT_NAMES)) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(
+        `${BASE}/proizvodi/kategorije/${slug}/`,
+        name
+      );
+      addProducts(products, null, name);
+    } catch (err) {
+      console.error(`   ⚠️ ${name}: ${err.message}`);
+    }
+  }
+
+  const unique = [...byKey.values()];
+  const withCat = unique.filter((p) => p.kategorija).length;
+
   console.log(`\n${"=".repeat(40)}`);
-  console.log(`Ukupno: ${allProducts.length} proizvoda`);
+  console.log(`Ukupno: ${unique.length} proizvoda`);
+  console.log(`Sa podkategorijom: ${withCat} (${((withCat / unique.length) * 100).toFixed(1)}%)`);
 
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = path.join(DATA_DIR, `prodavnicaalata_${timestamp}.json`);
 
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(filename, JSON.stringify(allProducts, null, 2), "utf-8");
+  fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
 
   // DB upsert
   const { upsertProducts } = require("./lib/db");
-  await upsertProducts(allProducts, "prodavnicaalata");
+  await upsertProducts(unique, "prodavnicaalata");
 }
 
 main().catch(console.error);
