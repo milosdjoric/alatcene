@@ -8,34 +8,38 @@ const DELAY_MS = 500;
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-const CATEGORIES = [
-  {
-    name: "Akumulatorski alati",
-    url: "/category/akumulatorski-alat/1198/",
-  },
-  {
-    name: "Električni alati",
-    url: "/category/elektricni-alati/1197/",
-  },
+// Sajt je migriran na WooCommerce. Top grupe (samo alat) → naziv za
+// parent_kategorija. Podkategorije čitamo sa stranice svake grupe.
+const TOP_GROUPS = [
+  { path: "product-category/aku-alati", name: "Akumulatorski alati" },
+  { path: "product-category/elektricni-alati", name: "Električni alati" },
 ];
+const SKIP_SLUGS = new Set(["page", "feed"]);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function fetchPage(url) {
-  const res = await fetch(url, {
-    headers: { "User-Agent": USER_AGENT },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: controller.signal,
+      redirect: "follow",
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.text();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function parsePrice(text) {
   if (!text) return null;
   const clean = text.replace(/[^0-9.,]/g, "").trim();
   if (!clean) return null;
-  // "24.999,00" → 24999
   const num = parseFloat(clean.replace(/\./g, "").replace(",", "."));
   return isNaN(num) ? null : Math.round(num);
 }
@@ -44,31 +48,28 @@ function parseProducts(html) {
   const $ = cheerio.load(html);
   const products = [];
 
-  $(".single-smallblog").each((_, el) => {
+  $(".product-tile__item").each((_, el) => {
     const $el = $(el);
 
-    const $title = $el.find(".nazivPr");
-    const naziv = $title.text().trim();
-    const $link = $el.find("a[href*='/product/']").first();
-    const url = $link.attr("href") || "";
+    const naziv = $el.find(".product-tile__item-name").first().text().trim();
+    const url = $el.find('a[href*="/proizvod/"]').first().attr("href") || "";
 
-    // ID iz URL-a: /product/name/12345/
-    const idMatch = url.match(/\/(\d+)\/?$/);
-    const id = idMatch ? idMatch[1] : null;
+    const $btn = $el.find("[data-product_id]").first();
+    const id = $btn.attr("data-product_id") || null;
+    const sku = $btn.attr("data-product_sku") || null;
 
-    // Cene: del za staru, span za novu
-    const $priceP = $el.find("p").filter((_, p) => $(p).text().includes("RSD"));
-    const $del = $priceP.find("del");
-    const $span = $priceP.find("span");
+    const $price = $el.find(".price").first();
+    const $ins = $price.find("ins .woocommerce-Price-amount");
+    const $del = $price.find("del .woocommerce-Price-amount");
+    const $regular = $el.find(".woocommerce-Price-amount");
 
     let cena = null;
     let redovnaCena = null;
-
-    if ($del.length && $span.length) {
-      redovnaCena = parsePrice($del.text());
-      cena = parsePrice($span.text());
-    } else if ($span.length) {
-      cena = parsePrice($span.text());
+    if ($ins.length) {
+      cena = parsePrice($ins.first().text());
+      redovnaCena = parsePrice($del.first().text());
+    } else if ($regular.length) {
+      cena = parsePrice($regular.first().text());
       redovnaCena = cena;
     }
 
@@ -79,23 +80,23 @@ function parseProducts(html) {
       popustProcenat = Math.round((popustIznos / redovnaCena) * 100);
     }
 
-    // Addtocard ima data-id
-    const $btn = $el.find(".addtocard");
-    const dataId = $btn.attr("data-id") || id;
-
-    const dostupnost = $btn.length > 0 ? "NA_STANJU" : "RASPRODATO";
+    // Brend iz /brand/ linka ("INGCO alati" → "INGCO")
+    const brend =
+      $el.find('a[href*="/brand/"]').first().text().trim().replace(/\s*alati$/i, "") ||
+      null;
 
     if (naziv && cena) {
       products.push({
-        id: dataId,
+        id,
+        sku,
         naziv,
-        brend: extractBrand(naziv),
+        brend,
         cena,
         redovna_cena: redovnaCena,
         popust_procenat: popustProcenat,
         popust_iznos: popustIznos,
         valuta: "RSD",
-        dostupnost,
+        dostupnost: "NA_STANJU",
         url: url.startsWith("http") ? url : BASE + url,
         izvor: "simns",
       });
@@ -105,62 +106,67 @@ function parseProducts(html) {
   return products;
 }
 
-function extractBrand(name) {
-  const upper = name.toUpperCase();
-  const brands = [
-    "BOSCH", "MAKITA", "DEWALT", "METABO", "HIKOKI", "MILWAUKEE",
-    "EINHELL", "STANLEY", "INGCO", "TOTAL", "FERM", "VILLAGER",
-    "FESTOOL", "FEIN", "DAEWOO", "KNIPEX", "YATO",
-  ];
-  for (const b of brands) {
-    if (upper.includes(b)) return b.charAt(0) + b.slice(1).toLowerCase();
-  }
-  return null;
-}
-
-function getMaxPage(html, baseUrl) {
-  const regex = new RegExp(
-    baseUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(\\d+)/",
-    "g"
-  );
+function getMaxPage(html) {
+  const $ = cheerio.load(html);
   let max = 1;
-  let match;
-  while ((match = regex.exec(html))) {
-    const num = parseInt(match[1]);
-    if (num > max) max = num;
-  }
+  $("nav.woocommerce-pagination a.page-numbers").each((_, el) => {
+    const href = $(el).attr("href") || "";
+    const hm = href.match(/\/page\/(\d+)\//);
+    if (hm) max = Math.max(max, parseInt(hm[1]));
+    const t = $(el).text().trim();
+    if (/^\d+$/.test(t)) max = Math.max(max, parseInt(t));
+  });
   return max;
 }
 
-async function fetchCategory(category) {
+async function fetchCategories() {
+  const out = [];
+  const seen = new Set();
+
+  for (const { path: topPath, name } of TOP_GROUPS) {
+    const html = await fetchPage(`${BASE}/${topPath}/`);
+    const $ = cheerio.load(html);
+    const re = new RegExp(`/${topPath}/([a-z0-9-]+)/`);
+
+    $("a[href]").each((_, el) => {
+      const href = $(el).attr("href") || "";
+      const m = href.match(re);
+      if (!m || SKIP_SLUGS.has(m[1])) return;
+      const naziv = $(el)
+        .text()
+        .trim()
+        .replace(/\s+/g, " ")
+        .replace(/\s*\(\d+\)\s*$/, "");
+      if (!naziv || naziv.length > 50 || seen.has(m[1])) return;
+      seen.add(m[1]);
+      out.push({
+        url: `${BASE}/${topPath}/${m[1]}/`,
+        kategorija: naziv,
+        parent: name,
+      });
+    });
+  }
+
+  return out;
+}
+
+async function fetchCategoryProducts(url, label) {
   const products = [];
-  const fullUrl = BASE + category.url;
-
-  console.log(`\n📦 ${category.name}`);
-
-  const firstHtml = await fetchPage(fullUrl);
-  const totalPages = getMaxPage(firstHtml, fullUrl);
-  console.log(`   ${totalPages} stranica`);
+  const firstHtml = await fetchPage(url);
+  const totalPages = getMaxPage(firstHtml);
 
   products.push(...parseProducts(firstHtml));
 
   for (let page = 2; page <= totalPages; page++) {
     await sleep(DELAY_MS);
     try {
-      const html = await fetchPage(`${fullUrl}${page}/`);
-      products.push(...parseProducts(html));
-
-      if (page % 5 === 0 || page === totalPages) {
-        console.log(
-          `   Stranica ${page}/${totalPages} — ukupno ${products.length}`
-        );
-      }
+      products.push(...parseProducts(await fetchPage(`${url}page/${page}/`)));
     } catch (err) {
-      console.error(`   ⚠️ Stranica ${page}: ${err.message}`);
+      console.error(`   ⚠️ ${label} str. ${page}: ${err.message}`);
     }
   }
 
-  console.log(`   Ukupno: ${products.length}`);
+  console.log(`   ${label} — ${products.length} proizvoda (${totalPages} str.)`);
   return products;
 }
 
@@ -168,28 +174,48 @@ async function main() {
   console.log("SIM NS Scraper — start");
   console.log("=".repeat(40));
 
-  const allProducts = [];
+  const subcats = await fetchCategories();
+  console.log(`Pronađeno ${subcats.length} podkategorija\n`);
 
-  for (const cat of CATEGORIES) {
-    const products = await fetchCategory(cat);
+  const byKey = new Map();
+  const addProducts = (products, kategorija, parent) => {
     for (const p of products) {
-      p.parent_kategorija = cat.name;
+      const key = p.id || p.url;
+      if (byKey.has(key)) continue;
+      p.kategorija = kategorija;
+      p.parent_kategorija = parent;
+      byKey.set(key, p);
     }
-    allProducts.push(...products);
+  };
+
+  console.log("📦 Podkategorije:");
+  for (const cat of subcats) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(cat.url, cat.kategorija);
+      addProducts(products, cat.kategorija, cat.parent);
+    } catch (err) {
+      console.error(`   ⚠️ ${cat.kategorija}: ${err.message}`);
+    }
   }
 
-  const seen = new Set();
-  const unique = [];
-  for (const p of allProducts) {
-    const key = p.id || p.url;
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(p);
+  console.log("\n📦 Root grupe (fallback):");
+  for (const { path: topPath, name } of TOP_GROUPS) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(`${BASE}/${topPath}/`, name);
+      addProducts(products, null, name);
+    } catch (err) {
+      console.error(`   ⚠️ ${name}: ${err.message}`);
     }
   }
+
+  const unique = [...byKey.values()];
+  const withCat = unique.filter((p) => p.kategorija).length;
 
   console.log(`\n${"=".repeat(40)}`);
-  console.log(`Ukupno: ${unique.length} jedinstvenih (od ${allProducts.length})`);
+  console.log(`Ukupno: ${unique.length} jedinstvenih`);
+  console.log(`Sa podkategorijom: ${withCat} (${((withCat / unique.length) * 100).toFixed(1)}%)`);
 
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = path.join(DATA_DIR, `simns_${timestamp}.json`);
@@ -198,7 +224,6 @@ async function main() {
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
 
-  // DB upsert
   const { upsertProducts } = require("./lib/db");
   await upsertProducts(unique, "simns");
 }

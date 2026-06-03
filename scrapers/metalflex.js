@@ -8,34 +8,36 @@ const DELAY_MS = 500;
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-const CATEGORIES = [
-  {
-    name: "Akumulatorski alati",
-    url: "/kategorija/masine-i-alati/akumulatorski-alat/",
-  },
-  {
-    name: "Električni alati",
-    url: "/kategorija/masine-i-alati/elektricni-alat-220v/",
-  },
+// Top grupe (samo alat): puna putanja + naziv za parent_kategorija.
+const TOP_GROUPS = [
+  { path: "kategorija/masine-i-alati/akumulatorski-alat", name: "Akumulatorski alati" },
+  { path: "kategorija/masine-i-alati/elektricni-alat-220v", name: "Električni alati" },
 ];
+const SKIP_SLUGS = new Set(["page", "feed"]);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function fetchPage(url) {
-  const res = await fetch(url, {
-    headers: { "User-Agent": USER_AGENT },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.text();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function parsePrice(text) {
   if (!text) return null;
   const clean = text.replace(/[^0-9.,]/g, "").trim();
   if (!clean) return null;
-  // "119.999,00" → 119999
   const num = parseFloat(clean.replace(/\./g, "").replace(",", "."));
   return isNaN(num) ? null : Math.round(num);
 }
@@ -116,38 +118,68 @@ function extractBrand(name) {
 }
 
 function getMaxPage(html) {
-  const matches = html.match(/\/page\/(\d+)\//g) || [];
+  const $ = cheerio.load(html);
   let max = 1;
-  for (const m of matches) {
-    const num = parseInt(m.match(/(\d+)/)[1]);
-    if (num > max) max = num;
-  }
+  $("nav.woocommerce-pagination a.page-numbers").each((_, el) => {
+    const href = $(el).attr("href") || "";
+    const hm = href.match(/\/page\/(\d+)\//);
+    if (hm) max = Math.max(max, parseInt(hm[1]));
+    const t = $(el).text().trim();
+    if (/^\d+$/.test(t)) max = Math.max(max, parseInt(t));
+  });
   return max;
 }
 
-async function fetchCategory(category) {
+// Pročitaj podkategorije sa stranice svake top grupe (putanja /{top}/{sub}/).
+async function fetchCategories() {
+  const out = [];
+  const seen = new Set();
+
+  for (const { path: topPath, name } of TOP_GROUPS) {
+    const html = await fetchPage(`${BASE}/${topPath}/`);
+    const $ = cheerio.load(html);
+    const re = new RegExp(`/${topPath}/([a-z0-9-]+)/$`);
+
+    $("a[href]").each((_, el) => {
+      const href = $(el).attr("href") || "";
+      const m = href.match(re);
+      if (!m || SKIP_SLUGS.has(m[1])) return;
+      const naziv = $(el)
+        .text()
+        .trim()
+        .replace(/\s+/g, " ")
+        .replace(/\s*\(\d+\)\s*$/, "");
+      if (!naziv || naziv.length > 50 || seen.has(m[1])) return;
+      seen.add(m[1]);
+      out.push({
+        url: `${BASE}/${topPath}/${m[1]}/`,
+        kategorija: naziv,
+        parent: name,
+      });
+    });
+  }
+
+  return out;
+}
+
+async function fetchCategoryProducts(url, label) {
   const products = [];
-  const fullUrl = BASE + category.url;
-
-  console.log(`\n📦 ${category.name}`);
-
-  const firstHtml = await fetchPage(fullUrl);
+  const firstHtml = await fetchPage(url);
   const totalPages = getMaxPage(firstHtml);
-  console.log(`   ${totalPages} stranica`);
 
   products.push(...parseProducts(firstHtml));
 
   for (let page = 2; page <= totalPages; page++) {
     await sleep(DELAY_MS);
     try {
-      const html = await fetchPage(`${fullUrl}page/${page}/`);
+      const html = await fetchPage(`${url}page/${page}/`);
       products.push(...parseProducts(html));
     } catch (err) {
-      console.error(`   ⚠️ Stranica ${page}: ${err.message}`);
+      console.error(`   ⚠️ ${label} str. ${page}: ${err.message}`);
     }
   }
 
-  console.log(`   Ukupno: ${products.length}`);
+  console.log(`   ${label} — ${products.length} proizvoda (${totalPages} str.)`);
   return products;
 }
 
@@ -155,28 +187,48 @@ async function main() {
   console.log("Metalflex Scraper — start");
   console.log("=".repeat(40));
 
-  const allProducts = [];
+  const subcats = await fetchCategories();
+  console.log(`Pronađeno ${subcats.length} podkategorija\n`);
 
-  for (const cat of CATEGORIES) {
-    const products = await fetchCategory(cat);
+  const byKey = new Map();
+  const addProducts = (products, kategorija, parent) => {
     for (const p of products) {
-      p.parent_kategorija = cat.name;
+      const key = p.id || p.url;
+      if (byKey.has(key)) continue;
+      p.kategorija = kategorija;
+      p.parent_kategorija = parent;
+      byKey.set(key, p);
     }
-    allProducts.push(...products);
+  };
+
+  console.log("📦 Podkategorije:");
+  for (const cat of subcats) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(cat.url, cat.kategorija);
+      addProducts(products, cat.kategorija, cat.parent);
+    } catch (err) {
+      console.error(`   ⚠️ ${cat.kategorija}: ${err.message}`);
+    }
   }
 
-  const seen = new Set();
-  const unique = [];
-  for (const p of allProducts) {
-    const key = p.id || p.url;
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(p);
+  console.log("\n📦 Root grupe (fallback):");
+  for (const { path: topPath, name } of TOP_GROUPS) {
+    await sleep(DELAY_MS);
+    try {
+      const products = await fetchCategoryProducts(`${BASE}/${topPath}/`, name);
+      addProducts(products, null, name);
+    } catch (err) {
+      console.error(`   ⚠️ ${name}: ${err.message}`);
     }
   }
+
+  const unique = [...byKey.values()];
+  const withCat = unique.filter((p) => p.kategorija).length;
 
   console.log(`\n${"=".repeat(40)}`);
-  console.log(`Ukupno: ${unique.length} jedinstvenih (od ${allProducts.length})`);
+  console.log(`Ukupno: ${unique.length} jedinstvenih`);
+  console.log(`Sa podkategorijom: ${withCat} (${((withCat / unique.length) * 100).toFixed(1)}%)`);
 
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = path.join(DATA_DIR, `metalflex_${timestamp}.json`);
@@ -185,7 +237,6 @@ async function main() {
   fs.writeFileSync(filename, JSON.stringify(unique, null, 2), "utf-8");
   console.log(`Sačuvano u: ${filename}`);
 
-  // DB upsert
   const { upsertProducts } = require("./lib/db");
   await upsertProducts(unique, "metalflex");
 }
