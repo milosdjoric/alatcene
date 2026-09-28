@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { getSiteStats, formatCount } from "@/lib/site-stats";
 import "./globals.css";
 
 // Variable font — sve težine (200–800) u jednom fajlu, pa nema liste weight-a.
-const manrope = Manrope({
+const jakarta = Plus_Jakarta_Sans({
   variable: "--font-main",
   subsets: ["latin", "latin-ext"],
 });
@@ -48,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sr" className={`${manrope.variable} h-full`}>
+    <html lang="sr" className={`${jakarta.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-background font-[var(--font-main)] text-foreground antialiased">
         {children}
       </body>

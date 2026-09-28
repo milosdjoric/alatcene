@@ -80,7 +80,7 @@
 
 - [x] Zajednički SiteHeader/SiteFooter (bili 4 različita header-a)
 - [x] Broj prodavnica/alata iz baze (src/lib/site-stats.ts) umesto ručnih 17/18/19
-- [x] Font Manrope umesto Space Grotesk
+- [x] Font Plus Jakarta Sans (Manrope → Jakarta; Euclid Flex odbačen — komercijalna licenca)
 - [x] Primeniti migraciju 20260928130000_get_source_counts.sql na produkciju
 - [x] Build + vizuelna provera + commit + push
 - [ ] Info stranica: title "O sajtu — cenealata.in.rs" + template daje dupli naziv sajta
