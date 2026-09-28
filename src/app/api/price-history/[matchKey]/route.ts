@@ -13,10 +13,10 @@ export async function GET(
 
   const supabase = createServerClient();
 
-  // Nađi sve product_id-jeve za ovaj match_key
+  // Nađi sve product_id-jeve za ovaj match_key (+ trenutna cena)
   const { data: products } = await supabase
     .from("products")
-    .select("id, izvor")
+    .select("id, izvor, cena")
     .eq("match_key", parsed.data);
 
   if (!products || products.length === 0) {
@@ -42,6 +42,18 @@ export async function GET(
     ...h,
     izvor: izvorMap[h.product_id],
   }));
+
+  // price_history čuva samo korake cene — produži liniju do danas trenutnom
+  // cenom (osim ako za danas već postoji zapis, npr cena se danas promenila).
+  const today = new Date().toISOString().slice(0, 10);
+  for (const p of products) {
+    const hasToday = result.some(
+      (h) => h.product_id === p.id && h.recorded_at === today
+    );
+    if (!hasToday) {
+      result.push({ product_id: p.id, cena: p.cena, recorded_at: today, izvor: p.izvor });
+    }
+  }
 
   return Response.json(result);
 }
