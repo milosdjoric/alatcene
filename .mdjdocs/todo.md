@@ -90,9 +90,27 @@
 - [ ] Cookie consent (Consent Mode v2) — odluka
 
 ### 10. Pretraga bez kvačica, po rečima (2026-09-28)
+
 - [x] Uzrok: search_grouped radio naziv ILIKE '%fraza%' — "busilica"≠"bušilica" + tačna fraza ("bosch busilica" = 9 grupa, samo Boss Shop)
 - [x] Migracija 20260928140000: unaccent, normalize_search(), products.naziv_search (generated), search_patterns(), search_grouped LIKE ALL — primenjena na produkciju
-- [x] /api/search koristi isti search_patterns + naziv_search (commit lokalno)
-- [ ] Verifikacija rezultata posle migracije (moj RPC poziv blokiran) — korisnik proverava u browseru
+- [x] /api/search koristi isti search_patterns + naziv_search (commit 8faa008, lokalno)
+- [ ] Verifikacija rezultata posle migracije (moj RPC poziv blokiran) — korisnik proverava u browseru; pre: bosch busilica=9, makita brusilica=23, aku srafilica=0
 - [ ] Izmeriti brzinu nove pretrage; ako je spora → GIN trigram indeks na naziv_search (LIKE ALL niz ga možda ne koristi)
-- [ ] Push commit-a za /api/search
+- [x] Push 8faa008
+
+### 11. Čišćenje indeksa na products (~26 MB)
+
+- [ ] Ponovo proveriti idx_scan pre brisanja
+- [ ] Migracija DROP INDEX CONCURRENTLY: idx_products_naziv_trgm (22 MB, stara pretraga), idx_products_izvor (pokriva ga uq_izvor_external_id), idx_products_dostupnost (2 vrednosti), idx_products_hist_min (0 skenova)
+- [ ] Pravilo: indeksi samo kroz migracije (svi na products su pravljeni ručno u dashboard-u)
+
+### 12. Osnovni SEO
+
+- [x] Google Search Console: TXT verifikacija dodata na Vercel DNS (DNS je na Vercel-u, ne mCloud)
+- [ ] Search Console: Verify + prijaviti sitemap.xml (korisnik)
+- [ ] Proizvod: generateMetadata (naziv + najniža cena + broj prodavnica), canonical, OG, notFound() umesto soft 404
+- [ ] JSON-LD: Product + AggregateOffer (proizvod), WebSite + SearchAction (početna)
+- [ ] Sitemap: svi proizvodi (bio limit 1000 redova?), stvarni lastModified
+- [ ] noindex,follow za pretragu/filtere; canonical za početnu
+- [ ] OG slika preko next/og
+- [ ] Info title duplikat, lang="sr-Latn"
