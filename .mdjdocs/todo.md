@@ -15,20 +15,24 @@
 ## Sledeća sesija — redosled
 
 ### 1. Supabase baza
+
 - [ ] SQL migracija u Supabase SQL Editor (products tabela, indexi, trigram, RLS)
 - [ ] src/lib/supabase/server.ts i client.ts
 
 ### 2. Import podataka
+
 - [ ] scrapers/lib/db.js (Supabase upsert helper)
 - [ ] scripts/import-existing.js (import JSON → baza)
 - [ ] Pokrenuti import, verifikovati ~34k redova u bazi
 
 ### 3. API ruta
+
 - [ ] src/app/api/search/route.ts
 - [ ] ILIKE + trigram pretraga
 - [ ] Filteri (izvor, kategorija, cena), sortiranje, paginacija
 
 ### 4. Frontend (moderan dizajn)
+
 - [ ] src/lib/constants.ts (SOURCES mapa)
 - [ ] src/lib/types.ts (Product interfejs)
 - [ ] src/components/ (SearchBar, ProductCard, FilterBar, SortSelect, SourceBadge)
@@ -36,10 +40,12 @@
 - [ ] Responsive, Tailwind
 
 ### 5. Scraper integracija
+
 - [ ] Modifikovati svih 17 scrapera da koriste db.js
 - [ ] Ažurirati scrape-all.js (cleanup starih proizvoda)
 
 ### 6. Product Matching
+
 - [x] SQL migracija: match_key + extracted_model kolone + indeks
 - [x] scripts/lib/model-extract.js — extraction funkcija (SKU → regex → NULL)
 - [x] scripts/match-products.js — batch skripta
@@ -54,6 +60,7 @@
 - [ ] Testirati end-to-end u browseru
 
 ### 7. Deploy
+
 - [x] GitHub repo + push
 - [x] Vercel import + env varijable
 - [x] .github/workflows/scrape.yml (cron 0 4 * * * UTC = 6h srpsko)
@@ -62,8 +69,21 @@
 - [ ] Testirati ceo flow end-to-end
 
 ### 8. Sanacija (2026-09-28)
+
 - [x] price_history: obrisati duple indekse (uq_product_date, idx_price_history_product)
 - [x] VACUUM FULL price_history — 437 MB → 102 MB (baza 437 MB, free limit 500 MB)
 - [x] Pregledati nekomitovane izmene u src/ (ubrzanje iz plan-ubrzanje.md)
-- [ ] Lokalni build + commit + push (deploy na Vercel)
+- [x] Lokalni build + commit + push (deploy na Vercel) — 1ae0ed2 READY
 - [ ] Odluka: sajt ostaje ili ne → scrape cron (disabled_inactivity od 03.08.)
+
+### 9. Header, font, analitika (2026-09-28)
+
+- [x] Zajednički SiteHeader/SiteFooter (bili 4 različita header-a)
+- [x] Broj prodavnica/alata iz baze (src/lib/site-stats.ts) umesto ručnih 17/18/19
+- [x] Font Manrope umesto Space Grotesk
+- [ ] Primeniti migraciju 20260928130000_get_source_counts.sql na produkciju (korisnik — SQL Editor; build pada dok ne postoji)
+- [ ] Build + vizuelna provera + commit + push
+- [ ] Info stranica: title "O sajtu — cenealata.in.rs" + template daje dupli naziv sajta
+- [x] GA4 (G-PZJXB4GTK7) → @next/third-parties u layout.tsx, NEXT_PUBLIC_GA_ID samo na Vercel Production
+- [ ] Posle deploy-a: proveriti GA Realtime da stižu pregledi
+- [ ] Cookie consent (Consent Mode v2) — odluka
