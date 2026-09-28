@@ -54,9 +54,16 @@
 - [ ] Testirati end-to-end u browseru
 
 ### 7. Deploy
-- [ ] GitHub repo + push
-- [ ] Vercel import + env varijable
-- [ ] .github/workflows/scrape.yml (cron 0 4 * * * UTC = 6h srpsko)
-- [ ] Cloudflare DNS za cenealata.xyz
-- [ ] Vercel custom domain
+- [x] GitHub repo + push
+- [x] Vercel import + env varijable
+- [x] .github/workflows/scrape.yml (cron 0 4 * * * UTC = 6h srpsko)
+- [x] Domen cenealata.in.rs (mCloud, ističe 18.04.2027)
+- [x] Vercel custom domain
 - [ ] Testirati ceo flow end-to-end
+
+### 8. Sanacija (2026-09-28)
+- [x] price_history: obrisati duple indekse (uq_product_date, idx_price_history_product)
+- [x] VACUUM FULL price_history — 437 MB → 102 MB (baza 437 MB, free limit 500 MB)
+- [x] Pregledati nekomitovane izmene u src/ (ubrzanje iz plan-ubrzanje.md)
+- [ ] Lokalni build + commit + push (deploy na Vercel)
+- [ ] Odluka: sajt ostaje ili ne → scrape cron (disabled_inactivity od 03.08.)
