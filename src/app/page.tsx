@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
-import { PAGE_SIZE } from "@/lib/constants";
+import { PAGE_SIZE, SITE_URL } from "@/lib/constants";
 import type { Product, GroupedSearchResponse } from "@/lib/types";
 import SearchBar from "@/components/SearchBar";
 import FilterSidebar from "@/components/FilterSidebar";
@@ -81,6 +82,30 @@ function hasActiveFilters(params: Record<string, string | undefined>): boolean {
   return !!(params.q || params.brend || params.izvor || params.kategorija || params.dostupnost || params.cena_min || params.cena_max || params.sort || params.page);
 }
 
+// Pretraga i filteri su beskonačno mnogo URL varijanti istog sadržaja —
+// ne indeksiramo ih (ali Google prati linkove ka proizvodima: follow).
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = await searchParams;
+  if (hasActiveFilters(params)) {
+    return { robots: { index: false, follow: true } };
+  }
+  return { alternates: { canonical: SITE_URL } };
+}
+
+// schema.org WebSite + SearchAction — Google može da prikaže polje za
+// pretragu sajta direktno u rezultatima.
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "cenealata.in.rs",
+  url: SITE_URL,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${SITE_URL}/?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
+};
+
 export default async function Home({ searchParams }: PageProps) {
   const params = await searchParams;
   const isLanding = !hasActiveFilters(params);
@@ -102,6 +127,12 @@ export default async function Home({ searchParams }: PageProps) {
 
   return (
     <>
+      {isLanding && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+      )}
       <SiteHeader showSearch={!isLanding} />
 
       {/* ===== LANDING ===== */}

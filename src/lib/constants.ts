@@ -1,3 +1,5 @@
+export const SITE_URL = "https://cenealata.in.rs";
+
 export const SOURCES: Record<
   string,
   { label: string; color: string; url: string }

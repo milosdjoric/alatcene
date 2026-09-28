@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { SOURCES } from "@/lib/constants";
+import { SITE_URL, SOURCES } from "@/lib/constants";
 import { getSiteStats } from "@/lib/site-stats";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "O sajtu — cenealata.in.rs",
+  title: "O sajtu",
+  alternates: { canonical: `${SITE_URL}/info` },
   description:
     "Informacije o sajtu cenealata.in.rs — kako funkcioniše, izvori podataka, uslovi korišćenja i politika privatnosti.",
 };

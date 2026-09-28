@@ -108,9 +108,12 @@
 
 - [x] Google Search Console: TXT verifikacija dodata na Vercel DNS (DNS je na Vercel-u, ne mCloud)
 - [ ] Search Console: Verify + prijaviti sitemap.xml (korisnik)
-- [ ] Proizvod: generateMetadata (naziv + najniža cena + broj prodavnica), canonical, OG, notFound() umesto soft 404
-- [ ] JSON-LD: Product + AggregateOffer (proizvod), WebSite + SearchAction (početna)
-- [ ] Sitemap: svi proizvodi (bio limit 1000 redova?), stvarni lastModified
-- [ ] noindex,follow za pretragu/filtere; canonical za početnu
-- [ ] OG slika preko next/og
-- [ ] Info title duplikat, lang="sr-Latn"
+- [x] Proizvod: generateMetadata (naziv + najniža cena + broj prodavnica), canonical, OG, notFound() (status ostaje 200 zbog loading.tsx streaming-a, ali Next dodaje noindex)
+- [x] JSON-LD: Product + AggregateOffer (proizvod), WebSite + SearchAction (početna)
+- [x] Sitemap: 536 → 15.420 URL-ova (RPC get_sitemap_groups + paginacija, PostgREST limit 1000), stvarni lastModified
+- [x] noindex,follow za pretragu/filtere; canonical za početnu i info
+- [x] OG slika preko next/og (sajt); og:url više ne nasleđuje početnu
+- [x] Info title duplikat, lang="sr-Latn"
+- [x] 404/error stranice: naslov bio text-white (nevidljiv na svetloj temi)
+- [ ] Posle deploy-a: Google Rich Results Test za jedan proizvod
+- [ ] OG slika: učitati Plus Jakarta Sans (default font nema bold); kasnije OG po proizvodu (naziv + cena)

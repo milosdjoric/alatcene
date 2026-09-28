@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
       <div className="mb-4 text-8xl font-bold text-accent">404</div>
-      <h1 className="mb-2 text-2xl font-semibold text-white">
+      <h1 className="mb-2 text-2xl font-semibold text-foreground">
         Stranica nije pronađena
       </h1>
       <p className="mb-8 max-w-md text-muted">

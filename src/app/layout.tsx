@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { getSiteStats, formatCount } from "@/lib/site-stats";
+import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
 // Variable font — sve težine (200–800) u jednom fajlu, pa nema liste weight-a.
@@ -18,11 +19,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: title, template: "%s | cenealata.in.rs" },
     description: `Pretraži i uporedi cene električnih i akumulatorskih alata iz ${storeCount} srpskih online prodavnica. Bosch, Makita, DeWalt, Milwaukee i drugi brendovi.`,
-    metadataBase: new URL("https://cenealata.in.rs"),
+    metadataBase: new URL(SITE_URL),
     openGraph: {
       title,
       description,
-      url: "https://cenealata.in.rs",
       siteName: "cenealata.in.rs",
       locale: "sr_RS",
       type: "website",
@@ -48,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sr" className={`${jakarta.variable} h-full`}>
+    <html lang="sr-Latn" className={`${jakarta.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-background font-[var(--font-main)] text-foreground antialiased">
         {children}
       </body>

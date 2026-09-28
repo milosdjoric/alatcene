@@ -1,65 +1,92 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { createServerClient } from "@/lib/supabase/server";
-import type { Product } from "@/lib/types";
+import { notFound } from "next/navigation";
 import SourceBadge from "@/components/SourceBadge";
 import PriceChart from "@/components/PriceChart";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { SOURCES } from "@/lib/constants";
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("sr-RS").format(price);
-}
+import { SITE_URL, SOURCES } from "@/lib/constants";
+import { getProductGroup, formatPrice } from "@/lib/product-group";
+import type { Product } from "@/lib/types";
 
 interface PageProps {
   params: Promise<{ matchKey: string }>;
 }
 
+function storesLabel(n: number): string {
+  return n === 1 ? "prodavnici" : n < 5 ? "prodavnice" : "prodavnica";
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { matchKey } = await params;
+  const decodedKey = decodeURIComponent(matchKey);
+  const { products, trusted } = await getProductGroup(decodedKey);
+  // Zbog root loading.tsx odgovor se strimuje sa statusom 200 — notFound()
+  // tada ubacuje <meta name="robots" content="noindex">, pa Google ne indeksira
+  // nepostojeće proizvode (umesto prazne stranice sa "index, follow").
+  if (products.length === 0) notFound();
+
+  const best = trusted[0] ?? products[0];
+  const n = products.length;
+  const title = `${best.naziv} — cena od ${formatPrice(best.cena)} RSD`;
+  const description =
+    n > 1
+      ? `Uporedi cene: ${best.naziv} u ${n} ${storesLabel(n)}, od ${formatPrice(best.cena)} RSD. Istorija cena i najniža ponuda na jednom mestu.`
+      : `${best.naziv} — ${formatPrice(best.cena)} RSD. Istorija cena i praćenje popusta.`;
+  const url = `${SITE_URL}/proizvod/${encodeURIComponent(decodedKey)}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    // openGraph stranice zamenjuje layout-ov u celosti — slika mora eksplicitno.
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "website",
+      siteName: "cenealata.in.rs",
+      locale: "sr_RS",
+      images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+    },
+  };
+}
+
+// schema.org Product + AggregateOffer — Google može da prikaže raspon cena
+// i broj prodavnica u rezultatima pretrage.
+function productJsonLd(products: Product[], trusted: Product[], url: string) {
+  const offers = trusted.length > 0 ? trusted : products;
+  const prices = offers.map((p) => p.cena);
+  const inStock = offers.some((p) => p.dostupnost === "NA_STANJU");
+  const best = offers[0];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: best.naziv,
+    ...(best.brend_normalized && { brand: { "@type": "Brand", name: best.brend_normalized } }),
+    ...(best.kategorija && { category: best.kategorija }),
+    url,
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "RSD",
+      lowPrice: Math.min(...prices),
+      highPrice: Math.max(...prices),
+      offerCount: offers.length,
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+  };
+}
+
 export default async function ProductComparePage({ params }: PageProps) {
   const { matchKey } = await params;
   const decodedKey = decodeURIComponent(matchKey);
+  const { products, trusted, historicalMin } = await getProductGroup(decodedKey);
 
-  const supabase = createServerClient();
-  const { data } = await supabase
-    .from("products")
-    .select("*")
-    .eq("match_key", decodedKey)
-    .order("dostupnost", { ascending: true })
-    .order("cena_sumnjiva", { ascending: true })
-    .order("cena", { ascending: true });
-
-  const products = (data ?? []) as Product[];
-
-  // Istorijski minimum
-  const productIds = (data ?? []).map((p: { id: number }) => p.id);
-  const { data: histMin } = productIds.length > 0
-    ? await supabase
-        .from("price_history")
-        .select("cena")
-        .in("product_id", productIds)
-        .order("cena", { ascending: true })
-        .limit(1)
-    : { data: null };
-  const historicalMin = histMin?.[0]?.cena ?? null;
-
-  if (products.length === 0) {
-    return (
-      <>
-        <SiteHeader showSearch />
-        <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <p className="text-muted">Proizvod nije pronađen.</p>
-          <Link href="/" className="text-accent hover:underline mt-4 inline-block">
-            &larr; Nazad na pretragu
-          </Link>
-        </main>
-        <SiteFooter />
-      </>
-    );
-  }
+  if (products.length === 0) notFound();
 
   const best = products[0];
   const brand = best.brend_normalized;
-  const trusted = products.filter((p) => !p.cena_sumnjiva);
   const bestTrusted = trusted[0] ?? best;
   const worstTrusted = trusted[trusted.length - 1] ?? products[products.length - 1];
   // Ušteda = najveći akcijski popust (redovna − akcijska cena) među ponudama,
@@ -72,8 +99,15 @@ export default async function ProductComparePage({ params }: PageProps) {
     0
   );
 
+  const jsonLd = productJsonLd(products, trusted, `${SITE_URL}/proizvod/${encodeURIComponent(decodedKey)}`);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // < escape-ovan da naziv proizvoda ne može da zatvori <script> tag
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <SiteHeader showSearch />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -92,7 +126,7 @@ export default async function ProductComparePage({ params }: PageProps) {
           </h1>
           <div className="flex items-center gap-3 text-sm text-subtle">
             {brand && <span>{brand}</span>}
-            <span>u {products.length} {products.length === 1 ? "prodavnici" : products.length < 5 ? "prodavnice" : "prodavnica"}</span>
+            <span>u {products.length} {storesLabel(products.length)}</span>
           </div>
         </div>
 

@@ -17,7 +17,7 @@ export default function Error({
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
       <div className="mb-6 text-5xl text-accent">⚠</div>
-      <h1 className="mb-2 text-2xl font-semibold text-white">
+      <h1 className="mb-2 text-2xl font-semibold text-foreground">
         Došlo je do greške
       </h1>
       <p className="mb-8 max-w-md text-muted">
