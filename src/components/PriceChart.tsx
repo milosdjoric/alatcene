@@ -85,8 +85,8 @@ export default function PriceChart({ matchKey }: { matchKey: string }) {
 
   if (loading) {
     return (
-      <div className="bg-[#16181d] border border-[#2a2d35] p-6">
-        <div className="h-[250px] flex items-center justify-center text-[#555963] text-sm">
+      <div className="bg-surface border border-border p-6">
+        <div className="h-[250px] flex items-center justify-center text-subtle text-sm">
           Učitavam grafikon...
         </div>
       </div>
@@ -96,9 +96,9 @@ export default function PriceChart({ matchKey }: { matchKey: string }) {
   if (data.length < 2) return null;
 
   return (
-    <div className="bg-[#16181d] border border-[#2a2d35]">
-      <div className="px-4 py-3 border-b border-[#2a2d35]">
-        <h2 className="text-sm font-bold text-[#e0e2e7] uppercase tracking-wider">
+    <div className="bg-surface border border-border">
+      <div className="px-4 py-3 border-b border-border">
+        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
           Kretanje cena
         </h2>
       </div>

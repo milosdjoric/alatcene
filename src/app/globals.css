@@ -1,36 +1,40 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Dark Industrial palette */
-  --color-background: #0c0d10;
-  --color-foreground: #e0e2e7;
-  --color-surface: #16181d;
-  --color-surface-hover: #1e2027;
-  --color-border: #2a2d35;
-  --color-border-hover: #3a3d45;
+  /* Light theme — svetla, čista paleta.
+     Cela tema se menja ovde; komponente koriste semantičke klase
+     (bg-surface, text-foreground, text-accent...), ne hex literale. */
 
-  /* Accent — safety lime */
-  --color-accent: #c8e64a;
-  --color-accent-dark: #a8c230;
-  --color-accent-dim: rgba(200, 230, 74, 0.12);
+  /* Površine */
+  --color-background: #f6f7f9;   /* pozadina stranice */
+  --color-surface: #ffffff;      /* kartice, header */
+  --color-surface-hover: #f0f2f5;
+  --color-border: #e4e7ec;
+  --color-border-hover: #d4d9e0;
 
-  /* Functional */
-  --color-success: #22c55e;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
-  --color-muted: #6b7280;
+  /* Tekst */
+  --color-foreground: #1a1d23;   /* primarni */
+  --color-muted: #5b6472;        /* sekundarni */
+  --color-subtle: #98a0ad;       /* najtiši */
 
-  /* Text */
-  --color-text-primary: #e0e2e7;
-  --color-text-secondary: #8b8f9a;
-  --color-text-muted: #555963;
+  /* Akcent — brand lime. accent = tamniji (čitljiv tekst/linkovi na svetlom),
+     accent-bright = puni lime (pozadine dugmadi, sa tamnim tekstom). */
+  --color-accent: #5f8f12;
+  --color-accent-hover: #4d7c0f;
+  --color-accent-bright: #c8e64a;
+  --color-accent-dim: rgba(95, 143, 18, 0.1);
+
+  /* Funkcionalne */
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
 
   /* Font */
   --font-sans: var(--font-main);
 }
 
 * {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -38,19 +42,19 @@ body {
   color: var(--color-foreground);
 }
 
-/* Custom scrollbar — dark */
+/* Custom scrollbar — light */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2d35;
-  border-radius: 3px;
+  background: #d4d9e0;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3d45;
+  background: #b8bfc9;
 }
 
 /* All text uses Space Grotesk via body font */

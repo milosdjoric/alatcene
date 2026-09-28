@@ -39,22 +39,22 @@ export default function Pagination({
       <button
         onClick={() => goToPage(currentPage - 1)}
         disabled={currentPage <= 1}
-        className="px-3 py-2.5 text-sm text-[#8b8f9a] hover:text-[#c8e64a] disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+        className="px-3 py-2.5 text-sm text-muted hover:text-accent disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
       >
         ←
       </button>
       <div className="flex items-center gap-0.5">
         {pages.map((p, i) =>
           p === "..." ? (
-            <span key={`dots-${i}`} className="px-1.5 sm:px-2 text-[#555963] text-sm">...</span>
+            <span key={`dots-${i}`} className="px-1.5 sm:px-2 text-subtle text-sm">...</span>
           ) : (
             <button
               key={p}
               onClick={() => goToPage(p)}
               className={`w-9 h-9 sm:w-10 sm:h-10 text-sm font-bold transition-colors cursor-pointer ${
                 p === currentPage
-                  ? "bg-[#c8e64a] text-[#0c0d10]"
-                  : "text-[#8b8f9a] hover:text-[#c8e64a]"
+                  ? "bg-accent-bright text-foreground"
+                  : "text-muted hover:text-accent"
               }`}
             >
               {p}
@@ -65,7 +65,7 @@ export default function Pagination({
       <button
         onClick={() => goToPage(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="px-3 py-2.5 text-sm text-[#8b8f9a] hover:text-[#c8e64a] disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+        className="px-3 py-2.5 text-sm text-muted hover:text-accent disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
       >
         →
       </button>

@@ -43,20 +43,20 @@ export default async function ProductComparePage({ params }: PageProps) {
   if (products.length === 0) {
     return (
       <>
-        <header className="bg-[#16181d] border-b border-[#2a2d35] sticky top-0 z-40">
+        <header className="bg-surface border-b border-border sticky top-0 z-40">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center h-14 gap-3">
               <Link href="/" className="flex items-center gap-0.5">
-                <span className="text-lg font-bold tracking-tight text-[#e0e2e7]">cene</span>
-                <span className="text-lg font-bold tracking-tight text-[#c8e64a]">alata</span>
-                <span className="text-xs text-[#555963] font-normal ml-0.5">.in.rs</span>
+                <span className="text-lg font-bold tracking-tight text-foreground">cene</span>
+                <span className="text-lg font-bold tracking-tight text-accent">alata</span>
+                <span className="text-xs text-subtle font-normal ml-0.5">.in.rs</span>
               </Link>
             </div>
           </div>
         </header>
         <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <p className="text-[#8b8f9a]">Proizvod nije pronađen.</p>
-          <Link href="/" className="text-[#c8e64a] hover:underline mt-4 inline-block">
+          <p className="text-muted">Proizvod nije pronađen.</p>
+          <Link href="/" className="text-accent hover:underline mt-4 inline-block">
             &larr; Nazad na pretragu
           </Link>
         </main>
@@ -82,14 +82,14 @@ export default async function ProductComparePage({ params }: PageProps) {
   return (
     <>
       {/* Header */}
-      <header className="bg-[#16181d] border-b border-[#2a2d35] sticky top-0 z-40">
+      <header className="bg-surface border-b border-border sticky top-0 z-40">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-14 gap-3">
             <Link href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">cene</span><span className="text-lg font-light tracking-tight text-[#e0e2e7]">alata</span>
+              <span className="text-lg font-bold tracking-tight text-accent">cene</span><span className="text-lg font-light tracking-tight text-foreground">alata</span>
             </Link>
-            <span className="text-[#2a2d35] mx-2">/</span>
-            <span className="text-sm text-[#8b8f9a] truncate">{best.naziv}</span>
+            <span className="text-border mx-2">/</span>
+            <span className="text-sm text-muted truncate">{best.naziv}</span>
           </div>
         </div>
       </header>
@@ -98,17 +98,17 @@ export default async function ProductComparePage({ params }: PageProps) {
         {/* Nazad */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-[#555963] hover:text-[#c8e64a] transition-colors mb-6"
+          className="inline-flex items-center gap-1.5 text-sm text-subtle hover:text-accent transition-colors mb-6"
         >
           &larr; Nazad na pretragu
         </Link>
 
         {/* Zaglavlje proizvoda */}
         <div className="mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold text-[#e0e2e7] mb-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
             {best.naziv}
           </h1>
-          <div className="flex items-center gap-3 text-sm text-[#555963]">
+          <div className="flex items-center gap-3 text-sm text-subtle">
             {brand && <span>{brand}</span>}
             <span>u {products.length} {products.length === 1 ? "prodavnici" : products.length < 5 ? "prodavnice" : "prodavnica"}</span>
           </div>
@@ -117,26 +117,26 @@ export default async function ProductComparePage({ params }: PageProps) {
         {/* Sumarni blok */}
         {products.length > 1 && (
           <div className={`grid gap-3 mb-8 ${historicalMin != null ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
-            <div className="bg-[#16181d] border border-[#2a2d35] p-4">
-              <p className="text-[10px] uppercase tracking-wider text-[#555963] mb-1">Najniža cena</p>
-              <p className="text-xl font-bold text-[#c8e64a]">{formatPrice(bestTrusted.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
+            <div className="bg-surface border border-border p-4">
+              <p className="text-[10px] uppercase tracking-wider text-subtle mb-1">Najniža cena</p>
+              <p className="text-xl font-bold text-accent">{formatPrice(bestTrusted.cena)} <span className="text-xs font-normal text-subtle">RSD</span></p>
             </div>
-            <div className="bg-[#16181d] border border-[#2a2d35] p-4">
-              <p className="text-[10px] uppercase tracking-wider text-[#555963] mb-1">Najviša cena</p>
-              <p className="text-xl font-bold text-[#e0e2e7]">{formatPrice(worstTrusted.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
+            <div className="bg-surface border border-border p-4">
+              <p className="text-[10px] uppercase tracking-wider text-subtle mb-1">Najviša cena</p>
+              <p className="text-xl font-bold text-foreground">{formatPrice(worstTrusted.cena)} <span className="text-xs font-normal text-subtle">RSD</span></p>
             </div>
-            <div className="bg-[#16181d] border border-[#2a2d35] p-4">
-              <p className="text-[10px] uppercase tracking-wider text-[#555963] mb-1">Ušteda</p>
+            <div className="bg-surface border border-border p-4">
+              <p className="text-[10px] uppercase tracking-wider text-subtle mb-1">Ušteda</p>
               {savings > 0 ? (
-                <p className="text-xl font-bold text-[#c8e64a]">{formatPrice(savings)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
+                <p className="text-xl font-bold text-accent">{formatPrice(savings)} <span className="text-xs font-normal text-subtle">RSD</span></p>
               ) : (
-                <p className="text-xl font-bold text-[#555963]">&mdash;</p>
+                <p className="text-xl font-bold text-subtle">&mdash;</p>
               )}
             </div>
             {historicalMin != null && (
-              <div className="bg-[#16181d] border border-[#2a2d35] p-4">
-                <p className="text-[10px] uppercase tracking-wider text-[#555963] mb-1">Istorijski min</p>
-                <p className="text-xl font-bold text-[#0ea5e9]">{formatPrice(historicalMin)} <span className="text-xs font-normal text-[#555963]">RSD</span></p>
+              <div className="bg-surface border border-border p-4">
+                <p className="text-[10px] uppercase tracking-wider text-subtle mb-1">Istorijski min</p>
+                <p className="text-xl font-bold text-[#0ea5e9]">{formatPrice(historicalMin)} <span className="text-xs font-normal text-subtle">RSD</span></p>
               </div>
             )}
           </div>
@@ -148,12 +148,12 @@ export default async function ProductComparePage({ params }: PageProps) {
         </div>
 
         {/* Tabela ponuda */}
-        <div className="bg-[#16181d] border border-[#2a2d35]">
-          <div className="px-4 py-3 border-b border-[#2a2d35]">
-            <h2 className="text-sm font-bold text-[#e0e2e7] uppercase tracking-wider">Ponude</h2>
+        <div className="bg-surface border border-border">
+          <div className="px-4 py-3 border-b border-border">
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Ponude</h2>
           </div>
 
-          <div className="divide-y divide-[#2a2d35]">
+          <div className="divide-y divide-border">
             {products.map((product, i) => {
               const sourceInfo = SOURCES[product.izvor];
               const isFirst = i === 0 && !product.cena_sumnjiva;
@@ -166,10 +166,10 @@ export default async function ProductComparePage({ params }: PageProps) {
                   href={product.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex items-center gap-4 px-4 py-3 hover:bg-[#1a1c22] transition-colors ${outOfStock ? "opacity-40" : ""}`}
+                  className={`flex items-center gap-4 px-4 py-3 hover:bg-surface transition-colors ${outOfStock ? "opacity-40" : ""}`}
                 >
                   {/* Rang */}
-                  <span className={`text-sm font-bold w-6 text-center flex-shrink-0 ${isFirst ? "text-[#c8e64a]" : "text-[#555963]"}`}>
+                  <span className={`text-sm font-bold w-6 text-center flex-shrink-0 ${isFirst ? "text-accent" : "text-subtle"}`}>
                     {i + 1}.
                   </span>
 
@@ -177,7 +177,7 @@ export default async function ProductComparePage({ params }: PageProps) {
                   <div className="flex-1 min-w-0">
                     <SourceBadge izvor={product.izvor} />
                     {sourceInfo && (
-                      <span className="text-[10px] text-[#555963] ml-2">{sourceInfo.url}</span>
+                      <span className="text-[10px] text-subtle ml-2">{sourceInfo.url}</span>
                     )}
                   </div>
 
@@ -185,7 +185,7 @@ export default async function ProductComparePage({ params }: PageProps) {
                     /* Sentinel/sumnjiva cena — lažan broj se ne prikazuje;
                        uputi korisnika da proveri pravu cenu kod prodavnice */
                     <span
-                      className="text-sm font-medium text-[#8b8f9a] flex-shrink-0"
+                      className="text-sm font-medium text-muted flex-shrink-0"
                       title="Cena na ovom sajtu izgleda kao greška ili placeholder — proveri direktno kod prodavnice"
                     >
                       Proveri cenu
@@ -194,32 +194,32 @@ export default async function ProductComparePage({ params }: PageProps) {
                     <>
                       {/* Popust */}
                       {product.popust_procenat && product.popust_procenat >= 5 && (
-                        <span className="text-[11px] font-bold text-[#c8e64a] flex-shrink-0">
+                        <span className="text-[11px] font-bold text-accent flex-shrink-0">
                           -{product.popust_procenat}%
                         </span>
                       )}
 
                       {/* Stara cena */}
                       {product.redovna_cena && product.redovna_cena > product.cena && (
-                        <span className="text-xs text-[#555963] line-through flex-shrink-0">
+                        <span className="text-xs text-subtle line-through flex-shrink-0">
                           {formatPrice(product.redovna_cena)}
                         </span>
                       )}
 
                       {/* Cena */}
-                      <span className={`text-base font-bold flex-shrink-0 ${isFirst ? "text-[#c8e64a]" : "text-[#e0e2e7]"}`}>
-                        {formatPrice(product.cena)} <span className="text-xs font-normal text-[#555963]">RSD</span>
+                      <span className={`text-base font-bold flex-shrink-0 ${isFirst ? "text-accent" : "text-foreground"}`}>
+                        {formatPrice(product.cena)} <span className="text-xs font-normal text-subtle">RSD</span>
                       </span>
                     </>
                   )}
 
                   {/* Dostupnost */}
                   {outOfStock && (
-                    <span className="text-[10px] uppercase tracking-wider text-[#555963] flex-shrink-0">rasprodato</span>
+                    <span className="text-[10px] uppercase tracking-wider text-subtle flex-shrink-0">rasprodato</span>
                   )}
 
                   {/* Arrow */}
-                  <span className="text-[#555963] flex-shrink-0">&rarr;</span>
+                  <span className="text-subtle flex-shrink-0">&rarr;</span>
                 </a>
               );
             })}
@@ -228,13 +228,13 @@ export default async function ProductComparePage({ params }: PageProps) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#2a2d35] mt-auto">
+      <footer className="border-t border-border mt-auto">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-[#8b8f9a]">cenealata.in.rs</span>
-              <span className="text-[#2a2d35]">/</span>
-              <span className="text-xs text-[#555963]">
+              <span className="text-muted">cenealata.in.rs</span>
+              <span className="text-border">/</span>
+              <span className="text-xs text-subtle">
                 cene ažurirane {products.length > 0
                   ? new Date(
                       products.reduce((latest, p) => p.updated_at > latest ? p.updated_at : latest, products[0].updated_at)
@@ -242,7 +242,7 @@ export default async function ProductComparePage({ params }: PageProps) {
                   : "—"}
               </span>
             </div>
-            <Link href="/info" className="text-[#555963] hover:text-[#c8e64a] transition-colors">
+            <Link href="/info" className="text-subtle hover:text-accent transition-colors">
               info
             </Link>
           </div>

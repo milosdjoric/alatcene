@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
 import { PAGE_SIZE } from "@/lib/constants";
@@ -64,6 +65,14 @@ async function fetchLastUpdated(): Promise<string | null> {
   return data?.updated_at ?? null;
 }
 
+async function fetchTotalCount(): Promise<number> {
+  const supabase = createServerClient();
+  const { count } = await supabase
+    .from("products")
+    .select("*", { count: "exact", head: true });
+  return count ?? 0;
+}
+
 async function fetchTopDeals() {
   const supabase = createServerClient();
 
@@ -79,6 +88,12 @@ async function fetchTopDeals() {
   return (data ?? []) as Product[];
 }
 
+// Brendovi, kategorije i ukupan broj menjaju se ~1×/dan (posle scrape-a) a upiti
+// su spori — keširamo na 1h umesto da ih računamo pri svakom otvaranju.
+const getCachedBrands = unstable_cache(fetchBrands, ["brand-counts"], { revalidate: 3600 });
+const getCachedCategories = unstable_cache(fetchCategories, ["category-counts"], { revalidate: 3600 });
+const getCachedTotalCount = unstable_cache(fetchTotalCount, ["total-count"], { revalidate: 3600 });
+
 function hasActiveFilters(params: Record<string, string | undefined>): boolean {
   return !!(params.q || params.brend || params.izvor || params.kategorija || params.dostupnost || params.cena_min || params.cena_max || params.sort || params.page);
 }
@@ -87,12 +102,16 @@ export default async function Home({ searchParams }: PageProps) {
   const params = await searchParams;
   const isLanding = !hasActiveFilters(params);
 
-  const [result, brands, categories, topDeals, lastUpdated] = await Promise.all([
-    fetchGroupedProducts(params),
-    fetchBrands(),
-    fetchCategories(),
+  const emptyResult: GroupedSearchResponse = { groups: [], total: 0, page: 1, totalPages: 0 };
+  const [result, brands, categories, topDeals, lastUpdated, totalCount] = await Promise.all([
+    // Na landing-u ne zovemo skupi search_grouped RPC (timeout-uje) — landing
+    // koristi samo brendove/kategorije/popuste.
+    isLanding ? Promise.resolve(emptyResult) : fetchGroupedProducts(params),
+    getCachedBrands(),
+    getCachedCategories(),
     isLanding ? fetchTopDeals() : Promise.resolve([]),
     fetchLastUpdated(),
+    getCachedTotalCount(),
   ]);
 
   const page = parseInt(params.page || "1");
@@ -103,10 +122,10 @@ export default async function Home({ searchParams }: PageProps) {
     <>
       {/* Header — floating glassmorphism */}
       <div className="sticky top-0 z-40 px-4 sm:px-6 lg:px-8 pt-3">
-        <header className="max-w-[1400px] mx-auto bg-[#16181d]/80 backdrop-blur-xl border border-[#2a2d35]/60 rounded-lg shadow-lg shadow-black/20">
+        <header className="max-w-[1400px] mx-auto bg-surface/80 backdrop-blur-xl border border-border/60 rounded-lg shadow-lg shadow-black/20">
           <div className="flex items-center h-12 px-4 gap-4">
             <a href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">cene</span><span className="text-lg font-light tracking-tight text-[#e0e2e7]">alata</span><span className="text-xs text-[#555963] font-normal ml-0.5">.in.rs</span>
+              <span className="text-lg font-bold tracking-tight text-accent">cene</span><span className="text-lg font-light tracking-tight text-foreground">alata</span><span className="text-xs text-subtle font-normal ml-0.5">.in.rs</span>
             </a>
 
             {!isLanding && (
@@ -117,77 +136,126 @@ export default async function Home({ searchParams }: PageProps) {
               </div>
             )}
 
-            <div className="hidden sm:flex items-center gap-3 text-[11px] text-[#555963] ml-auto">
-              <span><span className="text-[#8b8f9a]">19</span> prod.</span>
-              <span className="w-px h-3 bg-[#2a2d35]" />
-              <span><span className="text-[#8b8f9a]">{result.total.toLocaleString("sr-RS")}</span> alata</span>
+            <div className="hidden sm:flex items-center gap-3 text-[11px] text-subtle ml-auto">
+              <span><span className="text-muted">19</span> prod.</span>
+              <span className="w-px h-3 bg-border" />
+              <span><span className="text-muted">{totalCount.toLocaleString("sr-RS")}</span> alata</span>
             </div>
 
-            <Link href="/info" className="text-[11px] text-[#555963] hover:text-[#c8e64a] transition-colors">
+            <Link href="/info" className="text-[11px] text-subtle hover:text-accent transition-colors">
               info
             </Link>
           </div>
         </header>
       </div>
 
-      {/* Hero — samo na landing-u */}
+      {/* ===== LANDING ===== */}
       {isLanding && (
-        <section className="border-b border-[#2a2d35]">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-            <div className="max-w-2xl mx-auto text-center mb-10">
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
-                <span className="text-[#e0e2e7]">Pronađi </span>
-                <span className="text-[#c8e64a]">najbolju cenu</span>
-              </h1>
-              <p className="text-[#8b8f9a] text-lg">
-                19 prodavnica. 34.000+ alata. Jedno mesto.
-              </p>
+        <>
+          {/* Hero */}
+          <section className="border-b border-border bg-surface">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+              <div className="max-w-2xl mx-auto text-center mb-8">
+                <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3">
+                  <span className="text-foreground">Uporedi cene alata, </span>
+                  <span className="text-accent">nađi najnižu</span>
+                </h1>
+                <p className="text-muted text-base sm:text-lg">
+                  Svi alati iz 18 prodavnica na jednom mestu — sa istorijom cena.
+                </p>
+              </div>
+              <div className="max-w-xl mx-auto">
+                <Suspense>
+                  <SearchBar />
+                </Suspense>
+              </div>
             </div>
-            <div className="max-w-xl mx-auto mb-12">
-              <Suspense>
-                <SearchBar />
-              </Suspense>
-            </div>
+          </section>
 
-            {/* Kategorije */}
-            {categories.length > 0 && (
-              <div className="max-w-3xl mx-auto">
-                <div className="flex flex-wrap justify-center gap-2">
-                  {categories.slice(0, 12).map((cat) => (
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Dva sveta */}
+            <section className="py-10">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto">
+                <Link
+                  href="/?kategorija=Akumulatorski%20alati&sort=popust_desc"
+                  className="group rounded-xl border border-border bg-surface p-5 sm:p-8 hover:border-accent hover:shadow-md transition-all"
+                >
+                  <div className="text-3xl sm:text-4xl mb-3">🔋</div>
+                  <div className="text-base sm:text-lg font-bold text-foreground">Akumulatorski alati</div>
+                  <div className="text-xs sm:text-sm text-muted mt-1">Bušilice, brusilice, testere…</div>
+                  <div className="mt-3 text-sm font-medium text-accent">Pogledaj →</div>
+                </Link>
+                <Link
+                  href="/?kategorija=Električni%20alati&sort=popust_desc"
+                  className="group rounded-xl border border-border bg-surface p-5 sm:p-8 hover:border-accent hover:shadow-md transition-all"
+                >
+                  <div className="text-3xl sm:text-4xl mb-3">🔌</div>
+                  <div className="text-base sm:text-lg font-bold text-foreground">Električni alati</div>
+                  <div className="text-xs sm:text-sm text-muted mt-1">220V mašine za radionicu</div>
+                  <div className="mt-3 text-sm font-medium text-accent">Pogledaj →</div>
+                </Link>
+              </div>
+            </section>
+
+            {/* Brendovi */}
+            {brands.length > 0 && (
+              <section className="py-6">
+                <h2 className="text-xs font-bold text-subtle uppercase tracking-wider mb-3">Po brendu</h2>
+                <div className="flex flex-wrap gap-2">
+                  {brands.slice(0, 10).map((b) => (
                     <Link
-                      key={cat.name}
-                      href={`/?kategorija=${encodeURIComponent(cat.name)}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-none bg-[#16181d] border border-[#2a2d35] hover:border-[#c8e64a] text-sm text-[#8b8f9a] hover:text-[#c8e64a] transition-colors cursor-pointer"
+                      key={b.name}
+                      href={`/?brend=${encodeURIComponent(b.name)}`}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-surface border border-border hover:border-accent text-sm font-medium text-foreground hover:text-accent transition-colors"
                     >
-                      {cat.name}
-                      <span className="text-xs text-[#555963]">{cat.count.toLocaleString("sr-RS")}</span>
+                      {b.name}
+                      <span className="text-xs text-subtle">{b.count.toLocaleString("sr-RS")}</span>
                     </Link>
                   ))}
                 </div>
-              </div>
+              </section>
+            )}
+
+            {/* Kategorije */}
+            {categories.length > 0 && (
+              <section className="py-6">
+                <h2 className="text-xs font-bold text-subtle uppercase tracking-wider mb-3">Kategorije</h2>
+                <div className="flex flex-wrap gap-2">
+                  {categories.slice(0, 16).map((cat) => (
+                    <Link
+                      key={cat.name}
+                      href={`/?kategorija=${encodeURIComponent(cat.name)}`}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border hover:border-accent text-sm text-muted hover:text-accent transition-colors"
+                    >
+                      {cat.name}
+                      <span className="text-xs text-subtle">{cat.count.toLocaleString("sr-RS")}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Najveći popusti */}
+            {topDeals.length > 0 && (
+              <section className="py-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-bold text-foreground">🔥 Najveći popusti</h2>
+                  <Link
+                    href="/?sort=popust_desc&dostupnost=NA_STANJU"
+                    className="text-sm text-accent hover:text-accent-hover font-medium transition-colors"
+                  >
+                    Prikaži sve →
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {topDeals.map((product) => (
+                    <ProductCard key={`deal-${product.id}`} product={product} />
+                  ))}
+                </div>
+              </section>
             )}
           </div>
-        </section>
-      )}
-
-      {/* Top popusti — samo na landing-u */}
-      {isLanding && topDeals.length > 0 && (
-        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider">Najveći popusti</h2>
-            <Link
-              href="/?sort=popust_desc&dostupnost=NA_STANJU"
-              className="text-sm text-[#c8e64a] hover:text-[#a8c230] font-medium transition-colors"
-            >
-              Prikaži sve →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {topDeals.map((product) => (
-              <ProductCard key={`deal-${product.id}`} product={product} />
-            ))}
-          </div>
-        </section>
+        </>
       )}
 
       {/* Main — pretraga/filteri */}
@@ -210,11 +278,11 @@ export default async function Home({ searchParams }: PageProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3 sm:gap-4">
                 <div>
                   {q && (
-                    <h1 className="text-base font-bold text-[#e0e2e7] mb-0.5">
+                    <h1 className="text-base font-bold text-foreground mb-0.5">
                       &quot;{q}&quot;
                     </h1>
                   )}
-                  <p className="text-sm text-[#555963]">
+                  <p className="text-sm text-subtle">
                     {result.total.toLocaleString("sr-RS")} rezultata
                   </p>
                 </div>
@@ -243,19 +311,19 @@ export default async function Home({ searchParams }: PageProps) {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-[#2a2d35] mt-auto">
+      <footer className="border-t border-border mt-auto">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-[#8b8f9a]">cenealata.in.rs</span>
-              <span className="text-[#2a2d35]">/</span>
-              <span className="text-[#555963]">19 prodavnica</span>
-              <span className="text-[#2a2d35]">/</span>
-              <Link href="/info" className="text-[#555963] hover:text-[#c8e64a] transition-colors">
+              <span className="text-muted">cenealata.in.rs</span>
+              <span className="text-border">/</span>
+              <span className="text-subtle">19 prodavnica</span>
+              <span className="text-border">/</span>
+              <Link href="/info" className="text-subtle hover:text-accent transition-colors">
                 info
               </Link>
             </div>
-            <p className="text-xs text-[#555963]">
+            <p className="text-xs text-subtle">
               cene ažurirane {lastUpdated
                 ? new Date(lastUpdated).toLocaleDateString("sr-RS", { day: "numeric", month: "long", year: "numeric" })
                 : "—"}

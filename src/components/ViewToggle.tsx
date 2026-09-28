@@ -18,11 +18,11 @@ export default function ViewToggle() {
   }
 
   return (
-    <div className="flex items-center border border-[#2a2d35] overflow-hidden">
+    <div className="flex items-center border border-border overflow-hidden">
       <button
         onClick={() => setView("grid")}
         className={`p-2.5 transition-colors cursor-pointer ${
-          view === "grid" ? "bg-[#c8e64a]/10 text-[#c8e64a]" : "text-[#555963] hover:text-[#8b8f9a]"
+          view === "grid" ? "bg-accent-bright/10 text-accent" : "text-subtle hover:text-muted"
         }`}
         title="Grid prikaz"
       >
@@ -33,7 +33,7 @@ export default function ViewToggle() {
       <button
         onClick={() => setView("lista")}
         className={`p-2.5 transition-colors cursor-pointer ${
-          view === "lista" ? "bg-[#c8e64a]/10 text-[#c8e64a]" : "text-[#555963] hover:text-[#8b8f9a]"
+          view === "lista" ? "bg-accent-bright/10 text-accent" : "text-subtle hover:text-muted"
         }`}
         title="Lista prikaz"
       >

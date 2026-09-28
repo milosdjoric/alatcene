@@ -3,12 +3,12 @@ export default function Loading() {
     <div className="min-h-screen px-4 py-8">
       {/* Header skeleton */}
       <div className="mx-auto mb-8 max-w-7xl">
-        <div className="h-8 w-48 animate-pulse rounded bg-[#16181d]" />
+        <div className="h-8 w-48 animate-pulse rounded bg-surface" />
       </div>
 
       {/* Search bar skeleton */}
       <div className="mx-auto mb-8 max-w-3xl">
-        <div className="h-12 w-full animate-pulse rounded-lg bg-[#16181d]" />
+        <div className="h-12 w-full animate-pulse rounded-lg bg-surface" />
       </div>
 
       {/* Grid skeleton */}
@@ -16,7 +16,7 @@ export default function Loading() {
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="h-64 animate-pulse rounded-xl bg-[#16181d]"
+            className="h-64 animate-pulse rounded-xl bg-surface"
           />
         ))}
       </div>

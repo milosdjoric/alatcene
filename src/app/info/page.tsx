@@ -41,17 +41,17 @@ export default async function InfoPage() {
   return (
     <>
       {/* Header */}
-      <header className="bg-[#16181d] border-b border-[#2a2d35] sticky top-0 z-40">
+      <header className="bg-surface border-b border-border sticky top-0 z-40">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-14 gap-6">
             <Link href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-[#e0e2e7]">cene</span>
-              <span className="text-lg font-bold tracking-tight text-[#c8e64a]">alata</span>
-              <span className="text-xs text-[#555963] font-normal ml-0.5">.in.rs</span>
+              <span className="text-lg font-bold tracking-tight text-foreground">cene</span>
+              <span className="text-lg font-bold tracking-tight text-accent">alata</span>
+              <span className="text-xs text-subtle font-normal ml-0.5">.in.rs</span>
             </Link>
-            <div className="hidden sm:flex items-center gap-3 text-xs text-[#8b8f9a] ml-auto">
+            <div className="hidden sm:flex items-center gap-3 text-xs text-muted ml-auto">
               <span>17 prodavnica</span>
-              <span className="text-[#2a2d35]">/</span>
+              <span className="text-border">/</span>
               <span>34k+ alata</span>
             </div>
           </div>
@@ -63,19 +63,19 @@ export default async function InfoPage() {
         <div className="max-w-3xl">
           {/* Naslov */}
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">
-            <span className="text-[#e0e2e7]">O </span>
-            <span className="text-[#c8e64a]">sajtu</span>
+            <span className="text-foreground">O </span>
+            <span className="text-accent">sajtu</span>
           </h1>
-          <p className="text-[#555963] text-sm mb-12">
+          <p className="text-subtle text-sm mb-12">
             Poslednje ažuriranje: april 2026.
           </p>
 
           {/* Šta je cenealata.in.rs */}
           <section className="mb-12">
-            <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider mb-4">
+            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
               Šta je cenealata.in.rs
             </h2>
-            <div className="space-y-3 text-[#8b8f9a] text-sm leading-relaxed">
+            <div className="space-y-3 text-muted text-sm leading-relaxed">
               <p>
                 cenealata.in.rs je besplatan agregator cena alata i opreme iz srpskih
                 online prodavnica. Sajt ne prodaje proizvode — samo prikazuje javno
@@ -91,10 +91,10 @@ export default async function InfoPage() {
 
           {/* Kako funkcioniše */}
           <section className="mb-12">
-            <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider mb-4">
+            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
               Kako funkcioniše
             </h2>
-            <div className="space-y-3 text-[#8b8f9a] text-sm leading-relaxed">
+            <div className="space-y-3 text-muted text-sm leading-relaxed">
               <p>
                 Svakodnevno, automatski prikupljamo javno dostupne podatke o
                 proizvodima (naziv, cena, dostupnost) iz 17 online prodavnica.
@@ -110,17 +110,17 @@ export default async function InfoPage() {
 
           {/* Izvori podataka */}
           <section className="mb-12">
-            <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider mb-4">
+            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
               Izvori podataka
             </h2>
-            <p className="text-[#8b8f9a] text-sm leading-relaxed mb-4">
+            <p className="text-muted text-sm leading-relaxed mb-4">
               Trenutno pratimo cene iz sledećih prodavnica:
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {sources.map((source) => (
                 <div
                   key={source}
-                  className="px-3 py-2 bg-[#16181d] border border-[#2a2d35] text-sm text-[#8b8f9a]"
+                  className="px-3 py-2 bg-surface border border-border text-sm text-muted"
                 >
                   {source}
                 </div>
@@ -130,28 +130,28 @@ export default async function InfoPage() {
 
           {/* Važne napomene / Disclaimer */}
           <section className="mb-12">
-            <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider mb-4">
+            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
               Važne napomene
             </h2>
-            <div className="bg-[#16181d] border border-[#2a2d35] p-5">
-              <ul className="space-y-3 text-[#8b8f9a] text-sm leading-relaxed">
+            <div className="bg-surface border border-border p-5">
+              <ul className="space-y-3 text-muted text-sm leading-relaxed">
                 <li className="flex gap-2">
-                  <span className="text-[#c8e64a] flex-shrink-0">—</span>
+                  <span className="text-accent flex-shrink-0">—</span>
                   Cene prikazane na sajtu su informativnog karaktera i mogu se
                   razlikovati od aktuelnih cena u prodavnicama.
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#c8e64a] flex-shrink-0">—</span>
+                  <span className="text-accent flex-shrink-0">—</span>
                   Uvek proverite konačnu cenu i dostupnost na sajtu prodavnice pre
                   kupovine.
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#c8e64a] flex-shrink-0">—</span>
+                  <span className="text-accent flex-shrink-0">—</span>
                   cenealata.in.rs nije odgovoran za tačnost podataka, dostupnost
                   proizvoda, niti za transakcije obavljene u prodavnicama.
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#c8e64a] flex-shrink-0">—</span>
+                  <span className="text-accent flex-shrink-0">—</span>
                   Sajt nije povezan ni sa jednom od navedenih prodavnica i ne
                   prima proviziju od prodaje.
                 </li>
@@ -161,36 +161,36 @@ export default async function InfoPage() {
 
           {/* Uslovi korišćenja */}
           <section className="mb-12">
-            <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider mb-4">
+            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
               Uslovi korišćenja
             </h2>
-            <div className="space-y-3 text-[#8b8f9a] text-sm leading-relaxed">
+            <div className="space-y-3 text-muted text-sm leading-relaxed">
               <p>
                 Korišćenjem sajta cenealata.in.rs prihvatate sledeće uslove:
               </p>
               <ul className="space-y-2 ml-4">
                 <li className="flex gap-2">
-                  <span className="text-[#555963]">1.</span>
+                  <span className="text-subtle">1.</span>
                   Sajt pruža informativne usluge poređenja cena i ne predstavlja
                   prodavnicu niti posrednika u prodaji.
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#555963]">2.</span>
+                  <span className="text-subtle">2.</span>
                   Svi prikazani podaci potiču iz javno dostupnih izvora i
                   prikazani su u dobroj nameri.
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#555963]">3.</span>
+                  <span className="text-subtle">3.</span>
                   Ne garantujemo tačnost, potpunost ili ažurnost prikazanih
                   podataka.
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#555963]">4.</span>
+                  <span className="text-subtle">4.</span>
                   Zabranjeno je automatizovano prikupljanje podataka sa ovog sajta
                   (scraping) bez prethodne saglasnosti.
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#555963]">5.</span>
+                  <span className="text-subtle">5.</span>
                   Zadržavamo pravo da u bilo kom trenutku izmenimo ove uslove ili
                   prestanemo sa radom sajta.
                 </li>
@@ -200,10 +200,10 @@ export default async function InfoPage() {
 
           {/* Privatnost */}
           <section className="mb-12">
-            <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider mb-4">
+            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
               Privatnost
             </h2>
-            <div className="space-y-3 text-[#8b8f9a] text-sm leading-relaxed">
+            <div className="space-y-3 text-muted text-sm leading-relaxed">
               <p>
                 cenealata.in.rs ne prikuplja lične podatke korisnika. Ne koristimo
                 kolačiće za praćenje, ne zahtevamo registraciju i ne čuvamo
@@ -220,15 +220,15 @@ export default async function InfoPage() {
 
           {/* Kontakt */}
           <section className="mb-12">
-            <h2 className="text-base font-bold text-[#e0e2e7] uppercase tracking-wider mb-4">
+            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
               Kontakt
             </h2>
-            <p className="text-[#8b8f9a] text-sm leading-relaxed">
+            <p className="text-muted text-sm leading-relaxed">
               Za pitanja, primedbe ili zahteve za uklanjanje podataka, možete nas
               kontaktirati na{" "}
               <a
                 href="mailto:djoric.inbox@gmail.com"
-                className="text-[#c8e64a] hover:text-[#a8c230] transition-colors"
+                className="text-accent hover:text-accent-hover transition-colors"
               >
                 djoric.inbox@gmail.com
               </a>
@@ -239,15 +239,15 @@ export default async function InfoPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#2a2d35] mt-auto">
+      <footer className="border-t border-border mt-auto">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-[#8b8f9a]">cenealata.in.rs</span>
-              <span className="text-[#2a2d35]">/</span>
-              <span className="text-[#555963]">17 prodavnica</span>
+              <span className="text-muted">cenealata.in.rs</span>
+              <span className="text-border">/</span>
+              <span className="text-subtle">17 prodavnica</span>
             </div>
-            <p className="text-xs text-[#555963]">
+            <p className="text-xs text-subtle">
               cene ažurirane {lastUpdated
                 ? new Date(lastUpdated).toLocaleDateString("sr-RS", { day: "numeric", month: "long", year: "numeric" })
                 : "—"}

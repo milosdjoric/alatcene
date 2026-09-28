@@ -57,11 +57,11 @@ export default function ActiveFilters() {
         <button
           key={key}
           onClick={() => removeFilter(key)}
-          className="inline-flex items-center gap-1.5 px-3 py-1 border border-[#c8e64a]/30 bg-[#c8e64a]/5 text-[#c8e64a] text-sm hover:bg-[#c8e64a]/10 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1 border border-accent/30 bg-accent-bright/5 text-accent text-sm hover:bg-accent-bright/10 transition-colors cursor-pointer"
         >
-          <span className="text-[#c8e64a]/50 text-xs">{FILTER_LABELS[key]}:</span>
+          <span className="text-accent/50 text-xs">{FILTER_LABELS[key]}:</span>
           {formatValue(key, value)}
-          <svg className="h-3 w-3 text-[#c8e64a]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-3 w-3 text-accent/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -69,7 +69,7 @@ export default function ActiveFilters() {
       {activeFilters.length > 1 && (
         <button
           onClick={clearAll}
-          className="text-xs text-[#555963] hover:text-[#e0e2e7] px-2 py-1 transition-colors cursor-pointer"
+          className="text-xs text-subtle hover:text-foreground px-2 py-1 transition-colors cursor-pointer"
         >
           obriši sve
         </button>

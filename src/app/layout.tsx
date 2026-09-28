@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c0d10",
+  themeColor: "#f6f7f9",
   width: "device-width",
   initialScale: 1,
 };
@@ -50,7 +50,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="sr" className={`${spaceGrotesk.variable} h-full`}>
-      <body className="min-h-full flex flex-col bg-[#0c0d10] font-[var(--font-main)] text-[#e0e2e7] antialiased">
+      <body className="min-h-full flex flex-col bg-background font-[var(--font-main)] text-foreground antialiased">
         {children}
       </body>
     </html>
