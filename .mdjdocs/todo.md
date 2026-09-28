@@ -126,3 +126,8 @@
 - [ ] Grafikon cena u headless screenshot-u prazan — proveriti u pravom browseru
 - [ ] Boje prodavnica (SOURCES, npr. amcarco #84cc16) na beloj slabog kontrasta — badge-evi i legenda grafikona
 - [ ] Prvi (hladni) upit pretrage 6–9 s posle deploy-a — pratiti
+
+### 14. Favicon
+
+- [x] icon.svg (tamnozeleni kvadrat + lime "c", putanja bez fonta), favicon.ico 16/32/48, apple-icon.png 180 — umesto Next.js default-a
+- [ ] Obrisati neiskorišćene SVG-ove iz create-next-app šablona u public/ (file, globe, next, vercel)
