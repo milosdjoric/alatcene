@@ -3,7 +3,12 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useEffect } from "react";
 
-export default function SearchBar() {
+const VARIANTS = {
+  header: "py-2 text-sm bg-background focus:bg-surface",
+  hero: "py-3.5 text-base bg-surface shadow-sm",
+} as const;
+
+export default function SearchBar({ variant = "header" }: { variant?: keyof typeof VARIANTS }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +63,7 @@ export default function SearchBar() {
         defaultValue={q}
         onChange={(e) => handleInput(e.target.value)}
         placeholder="Pretraži alate..."
-        className="w-full pl-10 pr-10 py-3 rounded-none border border-border bg-background text-foreground text-sm placeholder:text-subtle focus:outline-none focus:border-accent transition-colors"
+        className={`w-full pl-10 pr-10 rounded-lg border border-border text-foreground placeholder:text-subtle focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 transition ${VARIANTS[variant]}`}
       />
       {q && (
         <button

@@ -13,6 +13,9 @@ import SortSelect from "@/components/SortSelect";
 import Pagination from "@/components/Pagination";
 import ProductCard from "@/components/ProductCard";
 import ViewToggle from "@/components/ViewToggle";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
+import { getSiteStats } from "@/lib/site-stats";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -54,25 +57,6 @@ async function fetchCategories() {
   return (data ?? []) as { name: string; count: number }[];
 }
 
-async function fetchLastUpdated(): Promise<string | null> {
-  const supabase = createServerClient();
-  const { data } = await supabase
-    .from("products")
-    .select("updated_at")
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .single();
-  return data?.updated_at ?? null;
-}
-
-async function fetchTotalCount(): Promise<number> {
-  const supabase = createServerClient();
-  const { count } = await supabase
-    .from("products")
-    .select("*", { count: "exact", head: true });
-  return count ?? 0;
-}
-
 async function fetchTopDeals() {
   const supabase = createServerClient();
 
@@ -88,11 +72,10 @@ async function fetchTopDeals() {
   return (data ?? []) as Product[];
 }
 
-// Brendovi, kategorije i ukupan broj menjaju se ~1×/dan (posle scrape-a) a upiti
+// Brendovi i kategorije menjaju se ~1×/dan (posle scrape-a) a upiti
 // su spori — keširamo na 1h umesto da ih računamo pri svakom otvaranju.
 const getCachedBrands = unstable_cache(fetchBrands, ["brand-counts"], { revalidate: 3600 });
 const getCachedCategories = unstable_cache(fetchCategories, ["category-counts"], { revalidate: 3600 });
-const getCachedTotalCount = unstable_cache(fetchTotalCount, ["total-count"], { revalidate: 3600 });
 
 function hasActiveFilters(params: Record<string, string | undefined>): boolean {
   return !!(params.q || params.brend || params.izvor || params.kategorija || params.dostupnost || params.cena_min || params.cena_max || params.sort || params.page);
@@ -103,15 +86,14 @@ export default async function Home({ searchParams }: PageProps) {
   const isLanding = !hasActiveFilters(params);
 
   const emptyResult: GroupedSearchResponse = { groups: [], total: 0, page: 1, totalPages: 0 };
-  const [result, brands, categories, topDeals, lastUpdated, totalCount] = await Promise.all([
+  const [result, brands, categories, topDeals, stats] = await Promise.all([
     // Na landing-u ne zovemo skupi search_grouped RPC (timeout-uje) — landing
     // koristi samo brendove/kategorije/popuste.
     isLanding ? Promise.resolve(emptyResult) : fetchGroupedProducts(params),
     getCachedBrands(),
     getCachedCategories(),
     isLanding ? fetchTopDeals() : Promise.resolve([]),
-    fetchLastUpdated(),
-    getCachedTotalCount(),
+    getSiteStats(),
   ]);
 
   const page = parseInt(params.page || "1");
@@ -120,34 +102,7 @@ export default async function Home({ searchParams }: PageProps) {
 
   return (
     <>
-      {/* Header — floating glassmorphism */}
-      <div className="sticky top-0 z-40 px-4 sm:px-6 lg:px-8 pt-3">
-        <header className="max-w-[1400px] mx-auto bg-surface/80 backdrop-blur-xl border border-border/60 rounded-lg shadow-lg shadow-black/20">
-          <div className="flex items-center h-12 px-4 gap-4">
-            <a href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-accent">cene</span><span className="text-lg font-light tracking-tight text-foreground">alata</span><span className="text-xs text-subtle font-normal ml-0.5">.in.rs</span>
-            </a>
-
-            {!isLanding && (
-              <div className="flex-1 max-w-2xl">
-                <Suspense>
-                  <SearchBar />
-                </Suspense>
-              </div>
-            )}
-
-            <div className="hidden sm:flex items-center gap-3 text-[11px] text-subtle ml-auto">
-              <span><span className="text-muted">19</span> prod.</span>
-              <span className="w-px h-3 bg-border" />
-              <span><span className="text-muted">{totalCount.toLocaleString("sr-RS")}</span> alata</span>
-            </div>
-
-            <Link href="/info" className="text-[11px] text-subtle hover:text-accent transition-colors">
-              info
-            </Link>
-          </div>
-        </header>
-      </div>
+      <SiteHeader showSearch={!isLanding} />
 
       {/* ===== LANDING ===== */}
       {isLanding && (
@@ -161,12 +116,12 @@ export default async function Home({ searchParams }: PageProps) {
                   <span className="text-accent">nađi najnižu</span>
                 </h1>
                 <p className="text-muted text-base sm:text-lg">
-                  Svi alati iz 18 prodavnica na jednom mestu — sa istorijom cena.
+                  Svi alati iz {stats.storeCount} prodavnica na jednom mestu — sa istorijom cena.
                 </p>
               </div>
               <div className="max-w-xl mx-auto">
                 <Suspense>
-                  <SearchBar />
+                  <SearchBar variant="hero" />
                 </Suspense>
               </div>
             </div>
@@ -310,27 +265,7 @@ export default async function Home({ searchParams }: PageProps) {
         </main>
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-border mt-auto">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted">cenealata.in.rs</span>
-              <span className="text-border">/</span>
-              <span className="text-subtle">19 prodavnica</span>
-              <span className="text-border">/</span>
-              <Link href="/info" className="text-subtle hover:text-accent transition-colors">
-                info
-              </Link>
-            </div>
-            <p className="text-xs text-subtle">
-              cene ažurirane {lastUpdated
-                ? new Date(lastUpdated).toLocaleDateString("sr-RS", { day: "numeric", month: "long", year: "numeric" })
-                : "—"}
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

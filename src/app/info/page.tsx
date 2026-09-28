@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { createServerClient } from "@/lib/supabase/server";
+import { SOURCES } from "@/lib/constants";
+import { getSiteStats } from "@/lib/site-stats";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: "O sajtu — cenealata.in.rs",
@@ -8,55 +10,12 @@ export const metadata: Metadata = {
     "Informacije o sajtu cenealata.in.rs — kako funkcioniše, izvori podataka, uslovi korišćenja i politika privatnosti.",
 };
 
-const sources = [
-  "Shoppster",
-  "Super Alati",
-  "Gama Alati",
-  "Prodavnica Alata",
-  "Najpovoljniji Alati",
-  "Omni-Alati",
-  "SBT-Alati",
-  "ePlaneta",
-  "Metalflex",
-  "Simns",
-  "Boss Shop",
-  "Axis Shop",
-  "KlikLak",
-  "Od Igle Do Lokomotive",
-  "Tim Komerc",
-  "Woby Haus",
-  "Amcarco",
-];
-
 export default async function InfoPage() {
-  const supabase = createServerClient();
-  const { data: lastRow } = await supabase
-    .from("products")
-    .select("updated_at")
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .single();
-  const lastUpdated = lastRow?.updated_at ?? null;
+  const { sources, storeCount } = await getSiteStats();
 
   return (
     <>
-      {/* Header */}
-      <header className="bg-surface border-b border-border sticky top-0 z-40">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-14 gap-6">
-            <Link href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-foreground">cene</span>
-              <span className="text-lg font-bold tracking-tight text-accent">alata</span>
-              <span className="text-xs text-subtle font-normal ml-0.5">.in.rs</span>
-            </Link>
-            <div className="hidden sm:flex items-center gap-3 text-xs text-muted ml-auto">
-              <span>17 prodavnica</span>
-              <span className="text-border">/</span>
-              <span>34k+ alata</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <SiteHeader showSearch />
 
       {/* Content */}
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 flex-1 w-full">
@@ -97,7 +56,7 @@ export default async function InfoPage() {
             <div className="space-y-3 text-muted text-sm leading-relaxed">
               <p>
                 Svakodnevno, automatski prikupljamo javno dostupne podatke o
-                proizvodima (naziv, cena, dostupnost) iz 17 online prodavnica.
+                proizvodima (naziv, cena, dostupnost) iz {storeCount} online prodavnica.
                 Podaci se ažuriraju jednom dnevno, obično oko 06:00 po srpskom
                 vremenu.
               </p>
@@ -117,12 +76,12 @@ export default async function InfoPage() {
               Trenutno pratimo cene iz sledećih prodavnica:
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-              {sources.map((source) => (
+              {sources.map(({ izvor }) => (
                 <div
-                  key={source}
+                  key={izvor}
                   className="px-3 py-2 bg-surface border border-border text-sm text-muted"
                 >
-                  {source}
+                  {SOURCES[izvor]?.label ?? izvor}
                 </div>
               ))}
             </div>
@@ -238,23 +197,7 @@ export default async function InfoPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border mt-auto">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted">cenealata.in.rs</span>
-              <span className="text-border">/</span>
-              <span className="text-subtle">17 prodavnica</span>
-            </div>
-            <p className="text-xs text-subtle">
-              cene ažurirane {lastUpdated
-                ? new Date(lastUpdated).toLocaleDateString("sr-RS", { day: "numeric", month: "long", year: "numeric" })
-                : "—"}
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

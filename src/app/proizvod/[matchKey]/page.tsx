@@ -3,6 +3,8 @@ import { createServerClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/types";
 import SourceBadge from "@/components/SourceBadge";
 import PriceChart from "@/components/PriceChart";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import { SOURCES } from "@/lib/constants";
 
 function formatPrice(price: number): string {
@@ -43,23 +45,14 @@ export default async function ProductComparePage({ params }: PageProps) {
   if (products.length === 0) {
     return (
       <>
-        <header className="bg-surface border-b border-border sticky top-0 z-40">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center h-14 gap-3">
-              <Link href="/" className="flex items-center gap-0.5">
-                <span className="text-lg font-bold tracking-tight text-foreground">cene</span>
-                <span className="text-lg font-bold tracking-tight text-accent">alata</span>
-                <span className="text-xs text-subtle font-normal ml-0.5">.in.rs</span>
-              </Link>
-            </div>
-          </div>
-        </header>
+        <SiteHeader showSearch />
         <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <p className="text-muted">Proizvod nije pronađen.</p>
           <Link href="/" className="text-accent hover:underline mt-4 inline-block">
             &larr; Nazad na pretragu
           </Link>
         </main>
+        <SiteFooter />
       </>
     );
   }
@@ -81,18 +74,7 @@ export default async function ProductComparePage({ params }: PageProps) {
 
   return (
     <>
-      {/* Header */}
-      <header className="bg-surface border-b border-border sticky top-0 z-40">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-14 gap-3">
-            <Link href="/" className="flex items-center gap-0.5 flex-shrink-0">
-              <span className="text-lg font-bold tracking-tight text-accent">cene</span><span className="text-lg font-light tracking-tight text-foreground">alata</span>
-            </Link>
-            <span className="text-border mx-2">/</span>
-            <span className="text-sm text-muted truncate">{best.naziv}</span>
-          </div>
-        </div>
-      </header>
+      <SiteHeader showSearch />
 
       <main className="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Nazad */}
@@ -227,27 +209,7 @@ export default async function ProductComparePage({ params }: PageProps) {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border mt-auto">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-muted">cenealata.in.rs</span>
-              <span className="text-border">/</span>
-              <span className="text-xs text-subtle">
-                cene ažurirane {products.length > 0
-                  ? new Date(
-                      products.reduce((latest, p) => p.updated_at > latest ? p.updated_at : latest, products[0].updated_at)
-                    ).toLocaleDateString("sr-RS", { day: "numeric", month: "long", year: "numeric" })
-                  : "—"}
-              </span>
-            </div>
-            <Link href="/info" className="text-subtle hover:text-accent transition-colors">
-              info
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
