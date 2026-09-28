@@ -31,7 +31,7 @@ export default async function SiteHeader({ showSearch = false }: SiteHeaderProps
           <Logo />
 
           {showSearch && (
-            <div className="flex-1 max-w-xl">
+            <div className="flex-1 min-w-0 max-w-xl">
               <Suspense>
                 <SearchBar />
               </Suspense>

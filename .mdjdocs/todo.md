@@ -81,9 +81,10 @@
 - [x] Zajednički SiteHeader/SiteFooter (bili 4 različita header-a)
 - [x] Broj prodavnica/alata iz baze (src/lib/site-stats.ts) umesto ručnih 17/18/19
 - [x] Font Manrope umesto Space Grotesk
-- [ ] Primeniti migraciju 20260928130000_get_source_counts.sql na produkciju (korisnik — SQL Editor; build pada dok ne postoji)
-- [ ] Build + vizuelna provera + commit + push
+- [x] Primeniti migraciju 20260928130000_get_source_counts.sql na produkciju
+- [x] Build + vizuelna provera + commit + push
 - [ ] Info stranica: title "O sajtu — cenealata.in.rs" + template daje dupli naziv sajta
 - [x] GA4 (G-PZJXB4GTK7) → @next/third-parties u layout.tsx, NEXT_PUBLIC_GA_ID samo na Vercel Production
 - [ ] Posle deploy-a: proveriti GA Realtime da stižu pregledi
+- [ ] Mobilna provera na pravom telefonu (headless Chrome ne ide ispod 500px)
 - [ ] Cookie consent (Consent Mode v2) — odluka
