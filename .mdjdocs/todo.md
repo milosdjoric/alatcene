@@ -88,3 +88,11 @@
 - [ ] Posle deploy-a: proveriti GA Realtime da stižu pregledi
 - [ ] Mobilna provera na pravom telefonu (headless Chrome ne ide ispod 500px)
 - [ ] Cookie consent (Consent Mode v2) — odluka
+
+### 10. Pretraga bez kvačica, po rečima (2026-09-28)
+- [x] Uzrok: search_grouped radio naziv ILIKE '%fraza%' — "busilica"≠"bušilica" + tačna fraza ("bosch busilica" = 9 grupa, samo Boss Shop)
+- [x] Migracija 20260928140000: unaccent, normalize_search(), products.naziv_search (generated), search_patterns(), search_grouped LIKE ALL — primenjena na produkciju
+- [x] /api/search koristi isti search_patterns + naziv_search (commit lokalno)
+- [ ] Verifikacija rezultata posle migracije (moj RPC poziv blokiran) — korisnik proverava u browseru
+- [ ] Izmeriti brzinu nove pretrage; ako je spora → GIN trigram indeks na naziv_search (LIKE ALL niz ga možda ne koristi)
+- [ ] Push commit-a za /api/search

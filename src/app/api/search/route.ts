@@ -18,7 +18,23 @@ export async function GET(request: Request) {
   let query = supabase.from("products").select("*", { count: "exact" });
 
   if (q) {
-    query = query.ilike("naziv", `%${q}%`);
+    // Ista normalizacija kao search_grouped (bez kvačica, po rečima, sve reči
+    // moraju da postoje) — logika živi samo u SQL funkciji search_patterns.
+    const { data: patterns, error: patternsError } = await supabase.rpc(
+      "search_patterns",
+      { q },
+    );
+    if (patternsError) {
+      return Response.json({ error: patternsError.message }, { status: 500 });
+    }
+    if (patterns) {
+      // likeAllOf spaja šablone zarezom — navodnici da reč sa zarezom ili
+      // zagradom ne pokvari PostgREST listu.
+      const quoted = (patterns as string[]).map(
+        (p) => `"${p.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`,
+      );
+      query = query.likeAllOf("naziv_search", quoted);
+    }
   }
   if (brend) {
     query = query.eq("brend_normalized", brend);
@@ -54,7 +70,10 @@ export async function GET(request: Request) {
       break;
     case "usteda_desc":
       // Ušteda = popust po proizvodu (redovna_cena - cena), kolona popust_iznos.
-      query = query.order("popust_iznos", { ascending: false, nullsFirst: false });
+      query = query.order("popust_iznos", {
+        ascending: false,
+        nullsFirst: false,
+      });
       break;
     case "cena_asc":
     default:
