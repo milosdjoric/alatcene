@@ -40,7 +40,7 @@ export default function ProductGroupList({ groups }: { groups: ProductGroup[] })
               {isSolo && bestOffer ? (
                 <SourceBadge izvor={bestOffer.izvor} />
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase bg-accent-bright/15 text-accent">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-bold tracking-wider uppercase bg-accent-bright/15 text-accent">
                   {group.num_sources} {group.num_sources < 5 ? "prod." : "prod."}
                 </span>
               )}
@@ -56,7 +56,7 @@ export default function ProductGroupList({ groups }: { groups: ProductGroup[] })
                   <span className="text-xs text-subtle">{group.brend_normalized}</span>
                 )}
                 {group.historical_min_cena != null && (
-                  <span className="text-[10px] text-subtle">
+                  <span className="text-[11px] text-subtle">
                     ist. min: {formatPrice(group.historical_min_cena)} RSD
                   </span>
                 )}
@@ -85,18 +85,18 @@ export default function ProductGroupList({ groups }: { groups: ProductGroup[] })
                 <span className="text-xs font-normal text-subtle ml-1">RSD</span>
               </span>
               {bestOffer?.cena_sumnjiva && (
-                <div className="text-[10px] text-warning" title="Cena odstupa od ostalih ponuda">
+                <div className="text-[11px] text-warning" title="Cena odstupa od ostalih ponuda">
                   moguća greška?
                 </div>
               )}
               {/* Popust na najjeftinijoj ponudi — precrtana stara cena + procenat */}
               {hasDiscount && bestOffer && (
                 <div className="flex items-center gap-1.5 justify-end">
-                  <span className="text-[10px] text-subtle line-through">
+                  <span className="text-[11px] text-subtle line-through">
                     {formatPrice(bestOffer.redovna_cena!)}
                   </span>
                   {bestOffer.popust_procenat != null && (
-                    <span className="text-[10px] font-bold text-success">
+                    <span className="text-[11px] font-bold text-success">
                       −{bestOffer.popust_procenat}%
                     </span>
                   )}
@@ -104,7 +104,7 @@ export default function ProductGroupList({ groups }: { groups: ProductGroup[] })
               )}
               {/* Raspon cena (samo ako nema popusta da se ne gomila) */}
               {!hasDiscount && hasMultiplePrices && !bestOffer?.cena_sumnjiva && (
-                <div className="text-[10px] text-subtle">
+                <div className="text-[11px] text-subtle">
                   — {formatPrice(group.max_cena)} RSD
                 </div>
               )}

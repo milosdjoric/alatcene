@@ -23,11 +23,11 @@ export default function ProductGroupCard({ group }: { group: ProductGroup }) {
         <div className="flex items-center justify-between mb-3">
           <SourceBadge izvor={bestOffer.izvor} />
           {bestOffer.dostupnost === "RASPRODATO" && (
-            <span className="text-[10px] uppercase tracking-wider text-subtle">rasprodato</span>
+            <span className="text-[11px] uppercase tracking-wider text-subtle">rasprodato</span>
           )}
         </div>
 
-        <h3 className="text-[13px] leading-snug font-medium text-muted line-clamp-2 mb-2 group-hover:text-foreground transition-colors min-h-[2.5rem]">
+        <h3 className="text-[14px] leading-snug font-medium text-muted line-clamp-2 mb-2 group-hover:text-foreground transition-colors min-h-[2.5rem]">
           {group.naziv}
         </h3>
 
@@ -41,7 +41,7 @@ export default function ProductGroupCard({ group }: { group: ProductGroup }) {
             <span className="text-xs font-normal text-subtle ml-1">RSD</span>
           </span>
           {bestOffer.cena_sumnjiva && (
-            <div className="text-[10px] text-warning mt-0.5" title="Cena izgleda kao greška">moguća greška?</div>
+            <div className="text-[11px] text-warning mt-0.5" title="Cena izgleda kao greška">moguća greška?</div>
           )}
         </div>
 
@@ -60,13 +60,13 @@ export default function ProductGroupCard({ group }: { group: ProductGroup }) {
     >
       {/* Badge — broj prodavnica */}
       <div className="flex items-center justify-between mb-3">
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase bg-accent-bright/15 text-accent">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-bold tracking-wider uppercase bg-accent-bright/15 text-accent">
           {group.num_sources} {group.num_sources === 1 ? "prodavnica" : group.num_sources < 5 ? "prodavnice" : "prodavnica"}
         </span>
       </div>
 
       {/* Naziv */}
-      <h3 className="text-[13px] leading-snug font-medium text-muted line-clamp-2 mb-2 group-hover:text-foreground transition-colors min-h-[2.5rem]">
+      <h3 className="text-[14px] leading-snug font-medium text-muted line-clamp-2 mb-2 group-hover:text-foreground transition-colors min-h-[2.5rem]">
         {group.naziv}
       </h3>
 
@@ -89,14 +89,14 @@ export default function ProductGroupCard({ group }: { group: ProductGroup }) {
           )}
         </div>
         {bestOffer?.cena_sumnjiva && (
-          <div className="text-[10px] text-warning mt-0.5" title="Cena izgleda kao greška">moguća greška?</div>
+          <div className="text-[11px] text-warning mt-0.5" title="Cena izgleda kao greška">moguća greška?</div>
         )}
       </div>
 
       {/* Istorijski minimum */}
       {group.historical_min_cena != null && (
-        <div className="mt-2 text-[11px] text-subtle">
-          Istorijski najniža: <span className="text-[#0ea5e9]">{formatPrice(group.historical_min_cena)} RSD</span>
+        <div className="mt-2 text-[12px] text-subtle">
+          Istorijski najniža: <span className="text-history">{formatPrice(group.historical_min_cena)} RSD</span>
         </div>
       )}
 

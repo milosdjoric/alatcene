@@ -134,15 +134,15 @@ export default async function ProductComparePage({ params }: PageProps) {
         {products.length > 1 && (
           <div className={`grid gap-3 mb-8 ${historicalMin != null ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
             <div className="bg-surface border border-border p-4">
-              <p className="text-[10px] uppercase tracking-wider text-subtle mb-1">Najniža cena</p>
+              <p className="text-[11px] uppercase tracking-wider text-subtle mb-1">Najniža cena</p>
               <p className="text-xl font-bold text-accent">{formatPrice(bestTrusted.cena)} <span className="text-xs font-normal text-subtle">RSD</span></p>
             </div>
             <div className="bg-surface border border-border p-4">
-              <p className="text-[10px] uppercase tracking-wider text-subtle mb-1">Najviša cena</p>
+              <p className="text-[11px] uppercase tracking-wider text-subtle mb-1">Najviša cena</p>
               <p className="text-xl font-bold text-foreground">{formatPrice(worstTrusted.cena)} <span className="text-xs font-normal text-subtle">RSD</span></p>
             </div>
             <div className="bg-surface border border-border p-4">
-              <p className="text-[10px] uppercase tracking-wider text-subtle mb-1">Ušteda</p>
+              <p className="text-[11px] uppercase tracking-wider text-subtle mb-1">Ušteda</p>
               {savings > 0 ? (
                 <p className="text-xl font-bold text-accent">{formatPrice(savings)} <span className="text-xs font-normal text-subtle">RSD</span></p>
               ) : (
@@ -151,8 +151,8 @@ export default async function ProductComparePage({ params }: PageProps) {
             </div>
             {historicalMin != null && (
               <div className="bg-surface border border-border p-4">
-                <p className="text-[10px] uppercase tracking-wider text-subtle mb-1">Istorijski min</p>
-                <p className="text-xl font-bold text-[#0ea5e9]">{formatPrice(historicalMin)} <span className="text-xs font-normal text-subtle">RSD</span></p>
+                <p className="text-[11px] uppercase tracking-wider text-subtle mb-1">Istorijski min</p>
+                <p className="text-xl font-bold text-history">{formatPrice(historicalMin)} <span className="text-xs font-normal text-subtle">RSD</span></p>
               </div>
             )}
           </div>
@@ -193,7 +193,7 @@ export default async function ProductComparePage({ params }: PageProps) {
                   <div className="flex-1 min-w-0">
                     <SourceBadge izvor={product.izvor} />
                     {sourceInfo && (
-                      <span className="text-[10px] text-subtle ml-2">{sourceInfo.url}</span>
+                      <span className="text-[11px] text-subtle ml-2">{sourceInfo.url}</span>
                     )}
                   </div>
 
@@ -210,7 +210,7 @@ export default async function ProductComparePage({ params }: PageProps) {
                     <>
                       {/* Popust */}
                       {product.popust_procenat && product.popust_procenat >= 5 && (
-                        <span className="text-[11px] font-bold text-accent flex-shrink-0">
+                        <span className="text-[12px] font-bold text-accent flex-shrink-0">
                           -{product.popust_procenat}%
                         </span>
                       )}
@@ -231,7 +231,7 @@ export default async function ProductComparePage({ params }: PageProps) {
 
                   {/* Dostupnost */}
                   {outOfStock && (
-                    <span className="text-[10px] uppercase tracking-wider text-subtle flex-shrink-0">rasprodato</span>
+                    <span className="text-[11px] uppercase tracking-wider text-subtle flex-shrink-0">rasprodato</span>
                   )}
 
                   {/* Arrow */}

@@ -34,7 +34,7 @@ export default function ProductList({ products }: { products: Product[] }) {
                 <SourceBadge izvor={product.izvor} />
               </div>
               {product.popust_procenat && product.popust_procenat >= 10 && (
-                <span className="sm:hidden flex-shrink-0 bg-accent-bright text-foreground text-[11px] font-bold px-2 py-0.5">
+                <span className="sm:hidden flex-shrink-0 bg-accent-bright text-foreground text-[12px] font-bold px-2 py-0.5">
                   -{product.popust_procenat}%
                 </span>
               )}
@@ -55,7 +55,7 @@ export default function ProductList({ products }: { products: Product[] }) {
               )}
             </div>
             {product.popust_procenat && product.popust_procenat >= 10 && (
-              <span className="hidden sm:inline-flex flex-shrink-0 bg-accent-bright text-foreground text-[11px] font-bold px-2 py-0.5">
+              <span className="hidden sm:inline-flex flex-shrink-0 bg-accent-bright text-foreground text-[12px] font-bold px-2 py-0.5">
                 -{product.popust_procenat}%
               </span>
             )}

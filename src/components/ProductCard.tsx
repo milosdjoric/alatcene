@@ -14,7 +14,7 @@ export default function ProductCard({ product }: { product: Product }) {
     >
       {/* Popust badge */}
       {product.popust_procenat && product.popust_procenat >= 10 && (
-        <div className="absolute top-0 right-0 bg-accent-bright text-foreground text-[11px] font-bold px-2 py-0.5">
+        <div className="absolute top-0 right-0 bg-accent-bright text-foreground text-[12px] font-bold px-2 py-0.5">
           -{product.popust_procenat}%
         </div>
       )}
@@ -22,11 +22,11 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="flex items-center justify-between mb-3">
         <SourceBadge izvor={product.izvor} />
         {outOfStock && (
-          <span className="text-[10px] uppercase tracking-wider text-subtle">rasprodato</span>
+          <span className="text-[11px] uppercase tracking-wider text-subtle">rasprodato</span>
         )}
       </div>
 
-      <h3 className="text-[13px] leading-snug font-medium text-muted line-clamp-2 mb-2 group-hover:text-foreground transition-colors min-h-[2.5rem]">
+      <h3 className="text-[14px] leading-snug font-medium text-muted line-clamp-2 mb-2 group-hover:text-foreground transition-colors min-h-[2.5rem]">
         {product.naziv}
       </h3>
 

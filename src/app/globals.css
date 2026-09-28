@@ -9,25 +9,26 @@
   --color-background: #f6f7f9;   /* pozadina stranice */
   --color-surface: #ffffff;      /* kartice, header */
   --color-surface-hover: #f0f2f5;
-  --color-border: #e4e7ec;
-  --color-border-hover: #d4d9e0;
+  --color-border: #d3d8df;
+  --color-border-hover: #b9c0ca;
 
   /* Tekst */
-  --color-foreground: #1a1d23;   /* primarni */
-  --color-muted: #5b6472;        /* sekundarni */
-  --color-subtle: #98a0ad;       /* najtiši */
+  --color-foreground: #0f1216;   /* primarni — kontrast 18.8:1 */
+  --color-muted: #3d4551;        /* sekundarni — 9.7:1 */
+  --color-subtle: #636b78;       /* najtiši — 5.4:1 (WCAG AA ≥ 4.5) */
 
   /* Akcent — brand lime. accent = tamniji (čitljiv tekst/linkovi na svetlom),
      accent-bright = puni lime (pozadine dugmadi, sa tamnim tekstom). */
-  --color-accent: #5f8f12;
-  --color-accent-hover: #4d7c0f;
+  --color-accent: #4a7409;       /* 5.5:1 na beloj */
+  --color-accent-hover: #3b5d07;
   --color-accent-bright: #c8e64a;
-  --color-accent-dim: rgba(95, 143, 18, 0.1);
+  --color-accent-dim: rgba(74, 116, 9, 0.1);
 
   /* Funkcionalne */
   --color-success: #16a34a;
   --color-danger: #dc2626;
   --color-warning: #d97706;
+  --color-history: #0369a1;      /* istorijski minimum — 5.9:1 */
 
   /* Font */
   --font-sans: var(--font-main);
@@ -37,9 +38,15 @@
   color-scheme: light;
 }
 
+/* 17px osnova (umesto 16) — sav rem tekst (text-xs/sm/base...) raste ~6%. */
+html {
+  font-size: 106.25%;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+  font-weight: 500;
 }
 
 /* Custom scrollbar — light */

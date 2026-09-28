@@ -117,3 +117,12 @@
 - [x] 404/error stranice: naslov bio text-white (nevidljiv na svetloj temi)
 - [ ] Posle deploy-a: Google Rich Results Test za jedan proizvod
 - [ ] OG slika: učitati Plus Jakarta Sans (default font nema bold); kasnije OG po proizvodu (naziv + cena)
+
+### 13. Kontrast i čitljivost
+
+- [x] Pretraga provereno na produkciji: bosch busilica 9→781, makita brusilica 23→321, aku srafilica 0→77
+- [x] Boje po WCAG AA: subtle 2.6→5.4:1, accent 3.9→5.5:1, muted 6→9.7:1, istorijski min (#0ea5e9 2.8:1) → token history 5.9:1
+- [x] Font: osnova 17px, težina 500, sitni px tekst +1px
+- [ ] Grafikon cena u headless screenshot-u prazan — proveriti u pravom browseru
+- [ ] Boje prodavnica (SOURCES, npr. amcarco #84cc16) na beloj slabog kontrasta — badge-evi i legenda grafikona
+- [ ] Prvi (hladni) upit pretrage 6–9 s posle deploy-a — pratiti

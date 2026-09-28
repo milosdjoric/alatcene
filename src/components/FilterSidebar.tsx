@@ -67,7 +67,7 @@ export default function FilterSidebar({
 
       {/* Dostupnost */}
       <div>
-        <h3 className="text-[10px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Dostupnost</h3>
+        <h3 className="text-[11px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Dostupnost</h3>
         <label className="flex items-center gap-2.5 cursor-pointer group">
           <input
             type="checkbox"
@@ -82,7 +82,7 @@ export default function FilterSidebar({
       {/* Kategorija */}
       {categories.length > 0 && (
         <div>
-          <h3 className="text-[10px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Kategorija</h3>
+          <h3 className="text-[11px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Kategorija</h3>
           {activeKategorija && (
             <button
               onClick={() => setFilter("kategorija", "")}
@@ -120,7 +120,7 @@ export default function FilterSidebar({
 
       {/* Cena */}
       <div>
-        <h3 className="text-[10px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Cena (RSD)</h3>
+        <h3 className="text-[11px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Cena (RSD)</h3>
         <div className="flex items-center gap-2">
           <input
             type="number"
@@ -144,7 +144,7 @@ export default function FilterSidebar({
 
       {/* Brend */}
       <div>
-        <h3 className="text-[10px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Brend</h3>
+        <h3 className="text-[11px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Brend</h3>
         {activeBrend && (
           <button
             onClick={() => setFilter("brend", "")}
@@ -181,7 +181,7 @@ export default function FilterSidebar({
 
       {/* Izvor */}
       <div>
-        <h3 className="text-[10px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Prodavnica</h3>
+        <h3 className="text-[11px] font-bold text-subtle uppercase tracking-[0.15em] mb-3">Prodavnica</h3>
         {activeIzvor && (
           <button
             onClick={() => setFilter("izvor", "")}
@@ -226,7 +226,7 @@ export default function FilterSidebar({
           </svg>
           filteri
           {hasFilters && (
-            <span className="bg-accent-bright text-foreground text-[10px] font-bold w-5 h-5 flex items-center justify-center">
+            <span className="bg-accent-bright text-foreground text-[11px] font-bold w-5 h-5 flex items-center justify-center">
               !
             </span>
           )}
@@ -256,7 +256,7 @@ export default function FilterSidebar({
       {/* Desktop sidebar */}
       <aside className="hidden lg:block w-56 flex-shrink-0">
         <div className="sticky top-20 bg-surface border border-border p-4">
-          <h2 className="text-[10px] font-bold text-subtle uppercase tracking-[0.15em] mb-4">Filteri</h2>
+          <h2 className="text-[11px] font-bold text-subtle uppercase tracking-[0.15em] mb-4">Filteri</h2>
           {content}
         </div>
       </aside>
