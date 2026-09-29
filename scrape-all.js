@@ -55,6 +55,13 @@ const manifest = {
     file: info.file,
     date: info.date,
   })),
+  // Status svakog scrapera — manifest se commit-uje posle svakog run-a (CI),
+  // pa git istorija ovog fajla pokazuje koji scraper je kada pukao.
+  scrapers: results.map((r) => ({
+    name: r.name,
+    status: r.status,
+    seconds: Math.round(r.duration / 1000),
+  })),
 };
 
 fs.writeFileSync(

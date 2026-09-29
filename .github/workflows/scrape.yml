@@ -5,6 +5,10 @@ on:
     - cron: "0 4 * * *" # 04:00 UTC = 06:00 Belgrade
   workflow_dispatch: # manual trigger
 
+# contents: write — za commit manifest-a (keepalive, vidi poslednji korak)
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -31,3 +35,17 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # GitHub gasi zakazane workflow-e posle 60 dana bez aktivnosti u repou
+      # (desilo se 03.08.2026 → 57 dana bez scrape-a). Dnevni commit manifest-a
+      # je aktivnost, pa se cron ne gasi. Vercel ga preskače (vercel.json).
+      - name: Commit manifest (keepalive)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/manifest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "chore(data): scrape manifest $(date -u +%F)"
+          git pull --rebase
+          git push
