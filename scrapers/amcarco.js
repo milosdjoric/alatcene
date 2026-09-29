@@ -45,7 +45,9 @@ function parseProducts(html) {
   const $ = cheerio.load(html);
   const products = [];
 
-  $("li.product.type-product").each((_, el) => {
+  // Tema je 2026-09 prešla sa <li> na <div> kartice — selektor bez taga.
+  // (Widget "novi proizvodi" na vrhu nema .type-product, pa ne ulazi.)
+  $(".product.type-product").each((_, el) => {
     const $el = $(el);
 
     const $title = $el.find(".woocommerce-loop-product__title a, h2 a");
@@ -238,4 +240,7 @@ async function main() {
   await upsertProducts(unique, "amcarco");
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1); // scrape-all mora da vidi pad (ranije exit 0 → lažni ✓)
+});
