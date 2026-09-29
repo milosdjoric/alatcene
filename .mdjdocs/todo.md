@@ -136,10 +136,16 @@
 - [x] Primenjen 20260929100000_products_live.sql → live 20.472 proizvoda, 13 prodavnica, 10.922 grupe
 - [x] Push aa8cc3f (products_live + keepalive workflow)
 - [x] Run 36539940892: OK 11 prodavnica (axisshop prvi put od aprila)
-- [ ] Popraviti scrapere sa 0 proizvoda: ananas (Algolia 403), gama-alati (HTTP 403), prodavnicaalata, shoppster, amcarco (0 bez greške)
-- [ ] Delimični: bosshop 189/646, kliklak 95/1471 (stale-cleanup preskočen — zaštita 50% radi)
-- [ ] najpovoljnijialati timeout 600s (upisao 4.839 pre prekida) — podići timeout ili ubrzati
-- [ ] scrape-all: "0 proizvoda" označavati kao grešku, ne ✓
+- [x] amcarco: tema <li>→<div> kartice → selektor .product.type-product (0 → 296)
+- [x] prodavnicaalata: sajt prešao na Next.js → čitanje RSC payload-a (self.__next_f), ?strana=N (0 → 6.165, sada i rasprodati)
+- [x] ananas: Algolia search-only ključ rotiran → čita se sa sajta pri svakom run-u (_app bundle), konstanta rezerva (0 → 6.227)
+- [x] bosshop: električni alat na 3 nivoa kategorija → spuštanje do listova (189 → 396)
+- [x] kliklak: tiho `break` na !res.ok → loguje status + retry na 429/503 (lokalno 1.405; CI uzrok vidi se u sledećem run-u)
+- [x] najpovoljnijialati: limit po scraperu 10 → 20 min; workflow 90 → 120 min
+- [x] scrape-all: scraperi exit 1 na grešku; 0 proizvoda = "empty" (∅), ne ✓; count u manifest-u
+- [ ] shoppster: Cloudflare bot zaštita na API-ju ("Just a moment", 403) — NE zaobilazimo; pitati prodavnicu za feed/partnerski pristup
+- [ ] gama-alati: Cloudflare 403 (od juna) — isto
+- [ ] crafter: 403, nikad nije radio — ukloniti iz SOURCES ili pitati za pristup
 - [ ] Sutra 06h: proveriti da li je keepalive korak commit-ovao manifest
 - [x] Keepalive: workflow commit-uje data/manifest.json (+ status scrapera), vercel.json ignoreCommand
 
