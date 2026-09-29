@@ -15,6 +15,7 @@ const TOP_GROUPS = [
   { path: "kategorija-proizvoda/elektricni-alat", name: "Električni alati" },
 ];
 const SKIP_SLUGS = new Set(["page", "feed"]);
+const MAX_CATEGORY_DEPTH = 3; // top → podkategorija → pod-podkategorija
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -106,32 +107,60 @@ function getMaxPage(html) {
   return max;
 }
 
+// Direktne podkategorije jedne kategorije: linkovi oblika /<catPath>/<slug>/.
+function parseChildCategories(html, catPath) {
+  const $ = cheerio.load(html);
+  const re = new RegExp(`/${catPath}/([a-z0-9-]+)/$`);
+  const out = [];
+  const seen = new Set();
+
+  $("a[href]").each((_, el) => {
+    const href = $(el).attr("href") || "";
+    const m = href.match(re);
+    if (!m || SKIP_SLUGS.has(m[1])) return;
+    const naziv = $(el)
+      .text()
+      .trim()
+      .replace(/\s+/g, " ")
+      .replace(/\s*\(\d+\)\s*$/, "");
+    if (!naziv || naziv.length > 50 || seen.has(m[1])) return;
+    seen.add(m[1]);
+    out.push({ path: `${catPath}/${m[1]}`, naziv });
+  });
+
+  return out;
+}
+
+// Listovi stabla kategorija. Sajt je 2026-09 prešao na 3 nivoa kod električnog
+// alata (npr. Bušilice → Vibracione i udarne) — kategorija sa podkategorijama
+// prikazuje samo pločice, proizvodi su tek u listovima. Spuštamo se do listova.
+async function collectLeaves(catPath, naziv, parent, depth, out, seen) {
+  const html = await fetchPage(`${BASE}/${catPath}/`);
+  const children = depth < MAX_CATEGORY_DEPTH ? parseChildCategories(html, catPath) : [];
+
+  if (children.length === 0) {
+    if (!seen.has(catPath)) {
+      seen.add(catPath);
+      out.push({ url: `${BASE}/${catPath}/`, kategorija: naziv, parent });
+    }
+    return;
+  }
+  for (const child of children) {
+    await sleep(DELAY_MS);
+    await collectLeaves(child.path, child.naziv, parent, depth + 1, out, seen);
+  }
+}
+
 async function fetchCategories() {
   const out = [];
   const seen = new Set();
 
   for (const { path: topPath, name } of TOP_GROUPS) {
     const html = await fetchPage(`${BASE}/${topPath}/`);
-    const $ = cheerio.load(html);
-    const re = new RegExp(`/${topPath}/([a-z0-9-]+)/$`);
-
-    $("a[href]").each((_, el) => {
-      const href = $(el).attr("href") || "";
-      const m = href.match(re);
-      if (!m || SKIP_SLUGS.has(m[1])) return;
-      const naziv = $(el)
-        .text()
-        .trim()
-        .replace(/\s+/g, " ")
-        .replace(/\s*\(\d+\)\s*$/, "");
-      if (!naziv || naziv.length > 50 || seen.has(m[1])) return;
-      seen.add(m[1]);
-      out.push({
-        url: `${BASE}/${topPath}/${m[1]}/`,
-        kategorija: naziv,
-        parent: name,
-      });
-    });
+    for (const sub of parseChildCategories(html, topPath)) {
+      await sleep(DELAY_MS);
+      await collectLeaves(sub.path, sub.naziv, name, 1, out, seen);
+    }
   }
 
   return out;
@@ -213,4 +242,7 @@ async function main() {
   await upsertProducts(unique, "bosshop");
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1); // scrape-all mora da vidi pad (ranije exit 0 → lažni ✓)
+});
