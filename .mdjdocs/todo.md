@@ -143,6 +143,9 @@
 - [x] kliklak: tiho `break` na !res.ok → loguje status + retry na 429/503 (lokalno 1.405; CI uzrok vidi se u sledećem run-u)
 - [x] najpovoljnijialati: limit po scraperu 10 → 20 min; workflow 90 → 120 min
 - [x] scrape-all: scraperi exit 1 na grešku; 0 proizvoda = "empty" (∅), ne ✓; count u manifest-u
+- [x] Run 36563374018 (29.09): 16 prodavnica OK, 33.142 live proizvoda, 16.549 grupa (5.074 sa 2+ prodavnice), baza 89 MB
+- [x] Keepalive radi: bot commit 92b537d, Vercel ga otkazao (ignoreCommand) — manifest.scrapers pokazuje status/count
+- [ ] kliklak: na CI-ju HTTP 429 već na strani 1 (i posle 3×60s Retry-After) — rate limit za GitHub IP-jeve, lokalno radi; ne zaobilazimo → pitati KlikLak za feed
 - [ ] shoppster: Cloudflare bot zaštita na API-ju ("Just a moment", 403) — NE zaobilazimo; pitati prodavnicu za feed/partnerski pristup
 - [ ] gama-alati: Cloudflare 403 (od juna) — isto
 - [ ] crafter: 403, nikad nije radio — ukloniti iz SOURCES ili pitati za pristup
