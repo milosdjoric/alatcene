@@ -4,7 +4,30 @@ const path = require("path");
 const DATA_DIR = path.join(__dirname, "..", "data");
 
 const ALGOLIA_APP_ID = "Y1BSBVJ7AC";
-const ALGOLIA_API_KEY = "dc5fcfef3e1ff9d07c8bb5aa76e94a04";
+// Javni search-only ključ koji Ananas šalje svakom browseru. Rotiraju ga
+// (2026-09: stari ključ → 403 "Invalid Application-ID or API key"), pa ga pri
+// svakom pokretanju čitamo sa sajta; konstanta je samo rezerva.
+const ALGOLIA_API_KEY_FALLBACK = "78d3f4f3befb3c4a68f4ebbf8c38fd81";
+const USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+let algoliaApiKey = ALGOLIA_API_KEY_FALLBACK;
+
+// Ključ je u konfiguraciji Next.js _app bundle-a: algoliaSearchOnlyAPIKey:"…".
+async function resolveAlgoliaKey() {
+  try {
+    const html = await (await fetch("https://ananas.rs/", { headers: { "User-Agent": USER_AGENT } })).text();
+    const appJs = html.match(/\/_next\/static\/chunks\/pages\/_app-[a-f0-9]+\.js/);
+    if (!appJs) throw new Error("_app bundle nije pronađen");
+    const js = await (await fetch(`https://ananas.rs${appJs[0]}`, { headers: { "User-Agent": USER_AGENT } })).text();
+    const key = js.match(/algoliaSearchOnlyAPIKey:"([a-f0-9]{32})"/);
+    if (!key) throw new Error("algoliaSearchOnlyAPIKey nije pronađen");
+    if (key[1] !== ALGOLIA_API_KEY_FALLBACK) console.log(`   ℹ️ Algolia ključ promenjen na sajtu: ${key[1]}`);
+    return key[1];
+  } catch (err) {
+    console.warn(`   ⚠️ Čitanje Algolia ključa sa sajta nije uspelo (${err.message}) — koristim rezervni`);
+    return ALGOLIA_API_KEY_FALLBACK;
+  }
+}
 const ALGOLIA_INDEX = "prod_merchant_inventories_sr";
 const ALGOLIA_URL = `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${ALGOLIA_INDEX}/query`;
 
@@ -71,7 +94,7 @@ async function fetchSubcategories(lvl1) {
     method: "POST",
     headers: {
       "X-Algolia-Application-Id": ALGOLIA_APP_ID,
-      "X-Algolia-API-Key": ALGOLIA_API_KEY,
+      "X-Algolia-API-Key": algoliaApiKey,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -111,7 +134,7 @@ async function fetchSubcategory(sub) {
       method: "POST",
       headers: {
         "X-Algolia-Application-Id": ALGOLIA_APP_ID,
-        "X-Algolia-API-Key": ALGOLIA_API_KEY,
+        "X-Algolia-API-Key": algoliaApiKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -157,6 +180,8 @@ async function main() {
   console.log("Ananas Scraper — start");
   console.log("=".repeat(40));
 
+  algoliaApiKey = await resolveAlgoliaKey();
+
   const allProducts = [];
 
   for (const group of TOP_GROUPS) {
@@ -198,4 +223,7 @@ async function main() {
   await upsertProducts(unique, "ananas");
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1); // scrape-all mora da vidi pad (ranije exit 0 → lažni ✓)
+});
