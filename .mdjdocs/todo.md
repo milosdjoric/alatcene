@@ -132,10 +132,15 @@
 - [x] Backup: ~/MdjWeb/backups/alatcene/2026-09-29/ (products 38.166, price_history 125.868, JSONL + gz)
 - [x] TRUNCATE price_history, historical_min_cena = NULL (triger privremeno isključen)
 - [x] Workflow uključen + ručni run 36539940892
-- [ ] Posle scrape-a: obrisati proizvode koji danas nisu osveženi
-- [ ] Primeniti 20260929100000_products_live.sql (TEK posle scrape-a — pre toga view prazan!)
-- [ ] Push koda koji čita products_live (tek posle migracije)
-- [ ] Log run-a: koji scraperi padaju (gama, sbt, axis?)
+- [x] ~~Obrisati neosvežene proizvode~~ — NE: products_live ih sakriva, a brisanje bi izgubilo vezu (izvor, external_id) za kad scraper proradi
+- [x] Primenjen 20260929100000_products_live.sql → live 20.472 proizvoda, 13 prodavnica, 10.922 grupe
+- [x] Push aa8cc3f (products_live + keepalive workflow)
+- [x] Run 36539940892: OK 11 prodavnica (axisshop prvi put od aprila)
+- [ ] Popraviti scrapere sa 0 proizvoda: ananas (Algolia 403), gama-alati (HTTP 403), prodavnicaalata, shoppster, amcarco (0 bez greške)
+- [ ] Delimični: bosshop 189/646, kliklak 95/1471 (stale-cleanup preskočen — zaštita 50% radi)
+- [ ] najpovoljnijialati timeout 600s (upisao 4.839 pre prekida) — podići timeout ili ubrzati
+- [ ] scrape-all: "0 proizvoda" označavati kao grešku, ne ✓
+- [ ] Sutra 06h: proveriti da li je keepalive korak commit-ovao manifest
 - [x] Keepalive: workflow commit-uje data/manifest.json (+ status scrapera), vercel.json ignoreCommand
 
 ### 14. Favicon
