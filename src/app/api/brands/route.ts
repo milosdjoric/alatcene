@@ -4,7 +4,7 @@ export async function GET() {
   const supabase = createServerClient();
 
   const { data, error } = await supabase
-    .from("products")
+    .from("products_live")
     .select("brend_normalized")
     .not("brend_normalized", "is", null)
     .order("brend_normalized");

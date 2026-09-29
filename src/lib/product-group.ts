@@ -15,7 +15,7 @@ export const getProductGroup = cache(
   async (matchKey: string): Promise<ProductGroupData> => {
     const supabase = createServerClient();
     const { data } = await supabase
-      .from("products")
+      .from("products_live")
       .select("*")
       .eq("match_key", matchKey)
       .order("dostupnost", { ascending: true })

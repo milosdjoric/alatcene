@@ -15,7 +15,7 @@ async function fetchSiteStats(): Promise<SiteStats> {
   const [counts, last] = await Promise.all([
     supabase.rpc("get_source_counts"),
     supabase
-      .from("products")
+      .from("products_live")
       .select("updated_at")
       .order("updated_at", { ascending: false })
       .limit(1)

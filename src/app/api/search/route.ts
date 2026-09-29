@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   const supabase = createServerClient();
 
-  let query = supabase.from("products").select("*", { count: "exact" });
+  let query = supabase.from("products_live").select("*", { count: "exact" });
 
   if (q) {
     // Ista normalizacija kao search_grouped (bez kvačica, po rečima, sve reči

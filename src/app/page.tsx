@@ -62,7 +62,7 @@ async function fetchTopDeals() {
   const supabase = createServerClient();
 
   const { data } = await supabase
-    .from("products")
+    .from("products_live")
     .select("*")
     .eq("dostupnost", "NA_STANJU")
     .not("popust_procenat", "is", null)

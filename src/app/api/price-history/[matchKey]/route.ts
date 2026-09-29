@@ -15,7 +15,7 @@ export async function GET(
 
   // Nađi sve product_id-jeve za ovaj match_key (+ trenutna cena)
   const { data: products } = await supabase
-    .from("products")
+    .from("products_live")
     .select("id, izvor, cena")
     .eq("match_key", parsed.data);
 

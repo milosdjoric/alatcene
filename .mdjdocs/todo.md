@@ -127,6 +127,17 @@
 - [ ] Boje prodavnica (SOURCES, npr. amcarco #84cc16) na beloj slabog kontrasta — badge-evi i legenda grafikona
 - [ ] Prvi (hladni) upit pretrage 6–9 s posle deploy-a — pratiti
 
+### 15. Restart podataka od nule (2026-09-29)
+
+- [x] Backup: ~/MdjWeb/backups/alatcene/2026-09-29/ (products 38.166, price_history 125.868, JSONL + gz)
+- [x] TRUNCATE price_history, historical_min_cena = NULL (triger privremeno isključen)
+- [x] Workflow uključen + ručni run 36539940892
+- [ ] Posle scrape-a: obrisati proizvode koji danas nisu osveženi
+- [ ] Primeniti 20260929100000_products_live.sql (TEK posle scrape-a — pre toga view prazan!)
+- [ ] Push koda koji čita products_live (tek posle migracije)
+- [ ] Log run-a: koji scraperi padaju (gama, sbt, axis?)
+- [x] Keepalive: workflow commit-uje data/manifest.json (+ status scrapera), vercel.json ignoreCommand
+
 ### 14. Favicon
 
 - [x] icon.svg (tamnozeleni kvadrat + lime "c", putanja bez fonta), favicon.ico 16/32/48, apple-icon.png 180 — umesto Next.js default-a
