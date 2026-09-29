@@ -90,6 +90,18 @@ function parsePageProducts(html) {
   return products;
 }
 
+// 429/503 = server traži da usporimo — sačekaj (Retry-After ili 5/10/20 s) i
+// pokušaj ponovo. 403 i ostalo se ne ponavlja (blokada/greška).
+async function fetchWithRetry(url, attempts = 3) {
+  for (let i = 0; ; i++) {
+    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    if (![429, 503].includes(res.status) || i >= attempts) return res;
+    const waitS = Number(res.headers.get("retry-after")) || 5 * 2 ** i;
+    console.warn(`   ⏳ HTTP ${res.status} — čekam ${waitS}s (pokušaj ${i + 1}/${attempts})`);
+    await sleep(waitS * 1000);
+  }
+}
+
 async function main() {
   console.log("KlikLak Scraper — start");
   console.log("=".repeat(40));
@@ -100,12 +112,20 @@ async function main() {
 
   while (page <= 100) {
     const url = page === 1 ? PAGE_URL : `${PAGE_URL}/p${page}`;
-    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-    if (!res.ok) break;
+    const res = await fetchWithRetry(url);
+    // Na CI-ju je scrape tiho stajao posle 2 strane (96 od ~1.400) — sad
+    // loguje zašto je stao, da se vidi uzrok umesto da se ćuti.
+    if (!res.ok) {
+      console.error(`   ⚠️ Stranica ${page}: HTTP ${res.status} — prekidam`);
+      break;
+    }
 
     const html = await res.text();
     const batch = parsePageProducts(html);
-    if (batch.length === 0) break;
+    if (batch.length === 0) {
+      console.log(`   Stranica ${page}: 0 proizvoda — kraj liste`);
+      break;
+    }
 
     let newCount = 0;
     for (const p of batch) {
@@ -139,4 +159,7 @@ async function main() {
   await upsertProducts(allProducts, "kliklak");
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1); // scrape-all mora da vidi pad (ranije exit 0 → lažni ✓)
+});
