@@ -227,4 +227,7 @@ async function main() {
   await upsertProducts(unique, "gama-alati");
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1); // scrape-all mora da vidi pad (ranije exit 0 → lažni ✓)
+});

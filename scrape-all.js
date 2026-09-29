@@ -15,6 +15,17 @@ console.log(`\n🔄 Scrape All — ${new Date().toISOString()}`);
 console.log(`   ${scrapers.length} scrapera\n`);
 
 const results = [];
+const today = new Date().toISOString().slice(0, 10);
+
+// Broj proizvoda iz današnjeg data fajla scrapera (niz ili { products: [] }).
+function countProducts(name) {
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, `${name}_${today}.json`), "utf-8"));
+    return (Array.isArray(data) ? data : data.products || []).length;
+  } catch {
+    return 0;
+  }
+}
 
 for (const file of scrapers) {
   const name = file.replace(".js", "");
@@ -23,9 +34,16 @@ for (const file of scrapers) {
   try {
     execSync(`node ${path.join(SCRAPERS_DIR, file)}`, {
       stdio: "inherit",
-      timeout: 10 * 60 * 1000, // 10 min po scraperу
+      timeout: 20 * 60 * 1000, // 20 min po scraperu (najpovoljnijialati ima ~5k proizvoda, 10 min nije bilo dovoljno)
     });
-    results.push({ name, status: "ok", duration: Date.now() - start });
+    // Scraper koji "uspe" a vrati 0 proizvoda (promenjen HTML) nije uspeh.
+    const count = countProducts(name);
+    results.push({
+      name,
+      status: count > 0 ? "ok" : "empty",
+      count,
+      duration: Date.now() - start,
+    });
   } catch (err) {
     console.error(`\n⚠️ ${name} FAILED\n`);
     results.push({ name, status: "error", duration: Date.now() - start });
@@ -60,6 +78,7 @@ const manifest = {
   scrapers: results.map((r) => ({
     name: r.name,
     status: r.status,
+    count: r.count ?? 0,
     seconds: Math.round(r.duration / 1000),
   })),
 };
@@ -73,6 +92,6 @@ fs.writeFileSync(
 console.log(`\n${"=".repeat(40)}`);
 console.log(`✅ Manifest ažuriran: ${manifest.sources.length} izvora`);
 for (const r of results) {
-  const icon = r.status === "ok" ? "✓" : "✗";
-  console.log(`   ${icon} ${r.name} (${Math.round(r.duration / 1000)}s)`);
+  const icon = { ok: "✓", empty: "∅", error: "✗" }[r.status];
+  console.log(`   ${icon} ${r.name} — ${r.count ?? 0} proizvoda (${Math.round(r.duration / 1000)}s)`);
 }
