@@ -85,7 +85,9 @@
 - [x] Build + vizuelna provera + commit + push
 - [ ] Info stranica: title "O sajtu — cenealata.in.rs" + template daje dupli naziv sajta
 - [x] GA4 (G-PZJXB4GTK7) → @next/third-parties u layout.tsx, NEXT_PUBLIC_GA_ID samo na Vercel Production
-- [ ] Posle deploy-a: proveriti GA Realtime da stižu pregledi
+- [x] GA Realtime = 0 → uzrok: CSP u middleware.ts blokirao googletagmanager/google-analytics; domeni dodati u script-src/img-src/connect-src
+- [ ] Commit + push CSP fix-a (main je ahead 1 / behind 1 → prvo pull --rebase)
+- [ ] Posle deploy-a: proveriti GA Realtime da stižu pregledi (+ Console bez CSP grešaka, test u inkognitu)
 - [ ] Mobilna provera na pravom telefonu (headless Chrome ne ide ispod 500px)
 - [ ] Cookie consent (Consent Mode v2) — odluka
 

@@ -4,11 +4,11 @@ import type { NextRequest } from "next/server";
 const securityHeaders = {
   "Content-Security-Policy": [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com",
     "font-src 'self'",
-    "connect-src 'self' https://*.supabase.co",
+    "connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -18,8 +18,7 @@ const securityHeaders = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "X-XSS-Protection": "0",
-  "Strict-Transport-Security":
-    "max-age=63072000; includeSubDomains; preload",
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
 };
 
 export function middleware(request: NextRequest) {
