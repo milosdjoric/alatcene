@@ -1,95 +1,95 @@
 {
-  "updated": "2026-10-09T12:15:49.625Z",
+  "updated": "2026-10-10T11:33:23.863Z",
   "sources": [
     {
       "source": "amcarco",
-      "file": "amcarco_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "amcarco_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "ananas",
-      "file": "ananas_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "ananas_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "axisshop",
-      "file": "axisshop_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "axisshop_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "bosshop",
-      "file": "bosshop_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "bosshop_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "crafter",
-      "file": "crafter_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "crafter_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "eplaneta",
-      "file": "eplaneta_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "eplaneta_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "kliklak",
-      "file": "kliklak_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "kliklak_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "metalflex",
-      "file": "metalflex_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "metalflex_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "najpovoljnijialati",
-      "file": "najpovoljnijialati_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "najpovoljnijialati_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "odigledolokomotive",
-      "file": "odigledolokomotive_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "odigledolokomotive_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "omni-alati",
-      "file": "omni-alati_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "omni-alati_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "prodavnicaalata",
-      "file": "prodavnicaalata_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "prodavnicaalata_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "sbt-alati",
-      "file": "sbt-alati_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "sbt-alati_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "shoppster",
-      "file": "shoppster_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "shoppster_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "simns",
-      "file": "simns_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "simns_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "superalati",
-      "file": "superalati_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "superalati_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "timkomerc",
-      "file": "timkomerc_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "timkomerc_2026-10-10.json",
+      "date": "2026-10-10"
     },
     {
       "source": "wobyhaus",
-      "file": "wobyhaus_2026-10-09.json",
-      "date": "2026-10-09"
+      "file": "wobyhaus_2026-10-10.json",
+      "date": "2026-10-10"
     }
   ],
   "scrapers": [
@@ -97,25 +97,25 @@
       "name": "amcarco",
       "status": "empty",
       "count": 0,
-      "seconds": 60
+      "seconds": 83
     },
     {
       "name": "ananas",
       "status": "ok",
-      "count": 6403,
-      "seconds": 32
+      "count": 6360,
+      "seconds": 35
     },
     {
       "name": "axisshop",
       "status": "ok",
       "count": 332,
-      "seconds": 138
+      "seconds": 147
     },
     {
       "name": "bosshop",
       "status": "ok",
       "count": 397,
-      "seconds": 402
+      "seconds": 271
     },
     {
       "name": "crafter",
@@ -126,8 +126,8 @@
     {
       "name": "eplaneta",
       "status": "ok",
-      "count": 1392,
-      "seconds": 190
+      "count": 1388,
+      "seconds": 178
     },
     {
       "name": "gama-alati",
@@ -137,75 +137,75 @@
     },
     {
       "name": "kliklak",
-      "status": "empty",
-      "count": 0,
-      "seconds": 184
+      "status": "ok",
+      "count": 1392,
+      "seconds": 729
     },
     {
       "name": "metalflex",
       "status": "ok",
       "count": 428,
-      "seconds": 62
+      "seconds": 60
     },
     {
       "name": "najpovoljnijialati",
-      "status": "error",
-      "count": 0,
-      "seconds": 1200
+      "status": "ok",
+      "count": 4858,
+      "seconds": 353
     },
     {
       "name": "odigledolokomotive",
       "status": "empty",
       "count": 0,
-      "seconds": 3
+      "seconds": 4
     },
     {
       "name": "omni-alati",
       "status": "ok",
       "count": 1881,
-      "seconds": 495
+      "seconds": 528
     },
     {
       "name": "prodavnicaalata",
       "status": "ok",
       "count": 6165,
-      "seconds": 499
+      "seconds": 530
     },
     {
       "name": "sbt-alati",
       "status": "ok",
       "count": 2672,
-      "seconds": 21
+      "seconds": 16
     },
     {
       "name": "shoppster",
       "status": "ok",
-      "count": 3159,
-      "seconds": 40
+      "count": 3153,
+      "seconds": 42
     },
     {
       "name": "simns",
       "status": "ok",
       "count": 350,
-      "seconds": 122
+      "seconds": 125
     },
     {
       "name": "superalati",
       "status": "ok",
-      "count": 4813,
-      "seconds": 154
+      "count": 4802,
+      "seconds": 168
     },
     {
       "name": "timkomerc",
       "status": "ok",
-      "count": 1768,
-      "seconds": 258
+      "count": 1772,
+      "seconds": 588
     },
     {
       "name": "wobyhaus",
       "status": "ok",
       "count": 319,
-      "seconds": 74
+      "seconds": 85
     }
   ]
 }
