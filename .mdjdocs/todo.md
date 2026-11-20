@@ -86,7 +86,7 @@
 - [ ] Info stranica: title "O sajtu — cenealata.in.rs" + template daje dupli naziv sajta
 - [x] GA4 (G-PZJXB4GTK7) → @next/third-parties u layout.tsx, NEXT_PUBLIC_GA_ID samo na Vercel Production
 - [x] GA Realtime = 0 → uzrok: CSP u middleware.ts blokirao googletagmanager/google-analytics; domeni dodati u script-src/img-src/connect-src
-- [ ] Commit + push CSP fix-a (main je ahead 1 / behind 1 → prvo pull --rebase)
+- [x] Commit + push CSP fix-a (9cb6182), novi CSP header potvrđen na produkciji
 - [ ] Posle deploy-a: proveriti GA Realtime da stižu pregledi (+ Console bez CSP grešaka, test u inkognitu)
 - [ ] Mobilna provera na pravom telefonu (headless Chrome ne ide ispod 500px)
 - [ ] Cookie consent (Consent Mode v2) — odluka
@@ -158,3 +158,27 @@
 
 - [x] icon.svg (tamnozeleni kvadrat + lime "c", putanja bez fonta), favicon.ico 16/32/48, apple-icon.png 180 — umesto Next.js default-a
 - [ ] Obrisati neiskorišćene SVG-ove iz create-next-app šablona u public/ (file, globe, next, vercel)
+
+### 16. Grafikon kretanja cena (2026-10-02)
+
+- [x] "Fali 1.10" — nije bug: price_history čuva samo promene, API dodaje današnju tačku
+- [x] Vremenska X osa (tick po danu, proređeno za duži period) umesto kategorijske
+- [x] stepAfter linije + forward fill po danu (tooltip pokazuje cenu koja je važila tog dana)
+- [x] Y osa: ravnomerni "lepi" koraci, format 6.500 umesto 6k
+- [x] Ostaci tamne teme (tooltip #16181d, osa #2a2d35) → tokeni svetle teme; legenda sa trenutnom cenom sortirana
+- [x] Provera: tsc + eslint čisto, screenshot desktop/390px (Bosch::0603354000, Ingco::CSSLI203083 sa promenom 30.9)
+- [ ] Commit + push grafikona
+- [ ] Proveriti "Ušteda" na proizvodu (PSM 80 A: 4.700 ≠ 6.636 − 3.900)
+
+### 17. Privatni pristup — Basic Auth (2026-11-19)
+
+Cilj: sajt dostupan samo meni dok imam domen; cron i scraping ostaju aktivni.
+
+- [x] Grana feat/private-basic-auth od main
+- [x] middleware: Basic Auth (SITE_USER/SITE_PASS env), constant-time poređenje, fail-closed u produkciji
+- [x] matcher proširen na sve putanje (i slike, api)
+- [x] noindex: X-Robots-Tag header + robots.ts Disallow: / + metadata robots index:false
+- [x] Provera: build + curl 401 bez kredencijala / 200 sa njima
+- [x] Vercel env SITE_USER/SITE_PASS (Production + Preview); lozinka u macOS Keychain ("cenealata.in.rs", nalog milos). Preview preko REST API-ja — CLI 51.5.1 bug (git_branch_required i sa --yes)
+- [ ] Commit + push + provera na cenealata.in.rs
+- [ ] Predlog (čeka potvrdu): middleware.ts → proxy.ts (Next 16 deprecation warning u build-u)

@@ -1,15 +1,8 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/constants";
 
+// Sajt je privatan (Basic Auth u middleware-u) — ne indeksirati ništa.
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [
-      {
-        userAgent: "*",
-        allow: "/",
-        disallow: ["/api/"],
-      },
-    ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    rules: [{ userAgent: "*", disallow: "/" }],
   };
 }

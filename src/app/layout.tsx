@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "cenealata.in.rs — Uporedi cene alata",
       description,
     },
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: false },
   };
 }
 
@@ -54,7 +54,9 @@ export default function RootLayout({
       </body>
       {/* GA4 samo gde je ID postavljen (Vercel Production) — lokalni dev i
           preview deploy-i ne ulaze u statistiku. */}
-      {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
+      {process.env.NEXT_PUBLIC_GA_ID && (
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+      )}
     </html>
   );
 }
