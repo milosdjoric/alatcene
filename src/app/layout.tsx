@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleTagManager } from "@next/third-parties/google";
 import { getSiteStats, formatCount } from "@/lib/site-stats";
 import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
@@ -52,10 +52,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background font-[var(--font-main)] text-foreground antialiased">
         {children}
       </body>
-      {/* GA4 samo gde je ID postavljen (Vercel Production) — lokalni dev i
-          preview deploy-i ne ulaze u statistiku. */}
-      {process.env.NEXT_PUBLIC_GA_ID && (
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+      {/* GTM (kontejner cenealata.in.rs, nalog „Privatni Klijenti"; GA4 G-PZJXB4GTK7 se pali iz
+          njega) samo gde je ID postavljen (Vercel Production) — lokalni dev i preview deploy-i ne
+          ulaze u statistiku. GA4 se više ne učitava direktno: oba zajedno bi duplirala posete. */}
+      {process.env.NEXT_PUBLIC_GTM_ID && (
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
       )}
     </html>
   );
