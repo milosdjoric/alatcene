@@ -180,5 +180,5 @@ Cilj: sajt dostupan samo meni dok imam domen; cron i scraping ostaju aktivni.
 - [x] noindex: X-Robots-Tag header + robots.ts Disallow: / + metadata robots index:false
 - [x] Provera: build + curl 401 bez kredencijala / 200 sa njima
 - [x] Vercel env SITE_USER/SITE_PASS (Production + Preview); lozinka u macOS Keychain ("cenealata.in.rs", nalog milos). Preview preko REST API-ja — CLI 51.5.1 bug (git_branch_required i sa --yes)
-- [ ] Commit + push + provera na cenealata.in.rs
+- [x] Commit 75f3aab + push main; produkcija (cenealata.in.rs + alatcene.vercel.app): 401 bez / 200 sa kredencijalima, i za /api/*, robots Disallow: /
 - [ ] Predlog (čeka potvrdu): middleware.ts → proxy.ts (Next 16 deprecation warning u build-u)
